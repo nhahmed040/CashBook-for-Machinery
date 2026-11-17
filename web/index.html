@@ -214,7 +214,18 @@
         <div class="card balance"><span class="label">Machines</span><span class="value" id="fleetCount">0</span></div>
         <div class="card in"><span class="label">Income</span><span class="value" id="fleetIncome">ETB 0</span></div>
         <div class="card out"><span class="label">Expenses</span><span class="value" id="fleetExpenses">ETB 0</span></div>
-      </div><p class="muted" id="fleetProfit">Net operating result: ETB 0</p></div>
+      </div>
+        <div class="fleet-filter-panel">
+          <div class="row">
+            <label class="field"><span>From date</span><input type="date" id="fleetFromDate"></label>
+            <label class="field"><span>To date</span><input type="date" id="fleetToDate"></label>
+          </div>
+          <div class="row">
+            <label class="field"><span>Machine</span><select id="fleetMachineFilter"><option value="all">All machines</option></select></label>
+            <button type="button" id="fleetClearFilters">Clear filters</button>
+          </div>
+        </div>
+        <p class="muted" id="fleetProfit">Net operating result: ETB 0</p></div>
       <div class="panel"><h2 id="machineFormTitle">Register a machine</h2><form id="machineForm" class="stack">
         <input id="machineName" required maxlength="60" placeholder="Machine name (e.g. Dump Truck 01)">
         <div class="row"><select id="machineType"><option>Dump truck / tipper</option><option>Wheel loader</option><option>Excavator</option><option>Bulldozer</option><option>Motor grader</option><option>Roller / compactor</option><option>Water truck</option><option>Crane</option><option>Other</option></select><input id="machinePlate" maxlength="24" placeholder="Plate / fleet ID"></div>
