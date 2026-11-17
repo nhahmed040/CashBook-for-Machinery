@@ -1837,7 +1837,6 @@
     renderBookList();
     applyEntriesScreen();
     renderEntries();
-    renderProjects();
     renderContacts();
     renderReports();
     renderSettings();
