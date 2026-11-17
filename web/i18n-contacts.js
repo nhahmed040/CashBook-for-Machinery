@@ -1,0 +1,92 @@
+/* UI text for contacts, filters, businesses, reminders and Excel/PDF export. Merged into window.CB_I18N.
+   English is the fallback for any missing key. Afaan Oromoo and Amharic wording should be reviewed by a native speaker. */
+(function () {
+  var add = {
+    en: {
+      import_boq: 'Import BoQ (Excel or CSV)', import_preview: 'Import BoQ from Excel',
+      import_counts: '{i} items, {r} plain rows, {l} summary lines, {g} group titles, {s} totals. Contract total {tot}.',
+      import_skipped: '{n} total/VAT rows left out (the app works them out).',
+      import_replace: 'Replace the current BoQ ({n} rows)', import_add: 'Add after the current rows',
+      import_replace_confirm: 'Replace the {n} BoQ rows of “{name}” with the imported rows?', import_do: 'Import',
+      import_done: 'Imported {n} rows', import_no_boq: 'No BoQ table found. The sheet needs Description, Qty and Rate columns.', import_replaced: 'BoQ replaced by import',
+      about_new_8: 'One backup file with data and photos, a 7-day backup reminder, and Recently deleted (30 days, with Undo)',
+      deleted_toast: 'Deleted “{n}”', undo: 'Undo', restored_item: 'Restored', cleared: 'cleared', recently_deleted: 'Recently deleted',
+      trash_note: 'Deleted items stay here for 30 days. Restore them, or delete them for good.', trash_empty: 'Nothing deleted recently.',
+      trash_days_left: '{n} days left', restore_item: 'Restore', trash_forever: 'Delete “{name}” for good? It cannot be restored afterwards.',
+      trash_no_parent: 'Restore the project first, then this item.', trash_kind_entry: 'Entry', trash_kind_boqrow: 'BoQ row', trash_kind_bill: 'Bill',
+      trash_kind_cert: 'Certificate', trash_kind_contact: 'Contact', trash_kind_project: 'Project', trash_kind_book: 'Book',
+      last_backup: 'Last backup: {d} ({e} entries, {p} projects)', no_backup_yet: 'No backup yet. Back up now so your work is safe.',
+      backup_overdue: 'Your last backup was {n} days ago. Save a backup file.', backup_never: 'You have no backup yet. Save one now.',
+      backup_now: 'Back up now', bk_later: 'Later', prerestore: 'Undo last restore',
+      prerestore_confirm: 'Go back to the data you had before the last restore?',
+      backup: 'Back up everything (data + photos)', restore: 'Restore from a backup file',
+      photos_note: 'The backup file contains all your data and photos. Keep it safe, for example send it to yourself on WhatsApp or email, then use “Restore from a backup file” on a new phone.',
+      advance_pct: 'Advance payment received (% of contract)', recovery_pct: 'Advance repayment %', cash_received: 'Cash received', vat_wht_pct: 'VAT withheld (% of VAT)', work_incl_vat: 'Work including VAT', penalty: 'Penalty', pay_to_contractor: 'Payment to contractor', vat_wht_amt: 'VAT withheld', of_vat: 'of VAT', cash_due: 'Cash to receive', wht_receipt: 'Withholding receipt no.', vat_wht_receipt: 'VAT withholding receipt no.', receipt_missing: 'receipt missing', tax_receipts: 'Tax receipts', adv_auto: 'Automatic', adv_manual: 'Enter amount', adv_manual_amount: 'Advance repayment amount', contract_incl_vat: 'Contract sum incl. VAT', your_books: 'Your Books', tap_switch_biz: 'Tap to switch business', add_new_book: 'Add New Book', add_new_book_sub: 'Click to quickly add books', search_books: 'Search books', no_books_found: 'No books found.', updated_on: 'Updated on', no_entries_short: 'No entries yet', my_books: 'My books', sort_updated: 'Last updated', sort_name: 'Name', sort_balance: 'Balance', m_rename: 'Rename', m_export: 'Export (CSV)', m_share: 'Share with people', m_project: 'Link to a project', m_business: 'Move to a business', m_delete: 'Delete book', book_name: 'Book name', switch_business: 'Switch business', pick_business_first: 'Pick a business first', staff: 'Staff', back: 'Back', from_phonebook: '📱 From phone book', phonebook_opt: '📱 From phone book…', more_filters: 'More filters (contact, mode, member, category)', contacts: 'Contacts', contact: 'Contact', add_contact: 'Add contact', edit_contact: 'Edit contact', search_contacts: 'Search name or phone',
+      no_contacts: 'No contacts yet. Add customers and suppliers, then pick them on entries.', no_contact_opt: 'No contact', new_contact_opt: '➕ New contact…',
+      all_contacts: 'All contacts', all_kinds: 'All types', kind_customer: 'Customer', kind_supplier: 'Supplier', kind_other: 'Other',
+      contact_name: 'Name', contact_phone: 'Phone', contact_email: 'Email', contact_address: 'Address', contact_kind: 'Type', contact_note: 'Note',
+      received_total: 'Received', paid_total: 'Paid', net_balance: 'Net', entries_n: 'Entries: {n}', show_entries: 'Show entries',
+      confirm_delete_contact: 'Delete this contact? Its entries stay, but lose the link.', contacts_summary: '{n} contacts · received {i} · paid {o}',
+      payment_mode: 'Payment mode', all_modes: 'All modes', mode_none: 'Mode', mode_cash: 'Cash', mode_bank: 'Bank', mode_mobile: 'Mobile money', mode_cheque: 'Cheque', mode_other: 'Other',
+      member: 'Member', all_members: 'All members', all_categories: 'All categories', me: 'Me',
+      business: 'Business', all_businesses: 'All businesses', businesses: 'Businesses', add_business: 'Add business', rename_business: 'Rename', delete_business: 'Delete business',
+      business_name: 'Business name', confirm_delete_business: 'Delete this business? Its books stay and move to “no business”.',
+      staff: 'Staff', add_staff: 'Add staff member', edit_staff: 'Edit staff member', staff_name: 'Name', staff_phone: 'Phone', staff_role: 'Role', no_staff: 'No staff yet.',
+      role_manager: 'Manager', role_accountant: 'Accountant', role_cashier: 'Cashier', role_viewer: 'Viewer', no_business: 'No business',
+      staff_note: 'Staff are a directory for tagging who made an entry. To let someone use a book, share it from Settings (Online sync) as editor or view only.',
+      reminders: 'Reminders', due_date: 'Due date', due_label: 'due', overdue: 'Overdue', due_soon: 'Due soon', bills_due_banner: '⏰ {n} unpaid bills overdue or due soon', unpaid_cert: 'Certificate unpaid by client', unpaid_bill: 'Bill to pay',
+      export_report: 'Export report', export_excel: 'Excel', export_pdf: 'PDF / print', report_title: 'Cash report', this_book: 'This book', all_books_opt: 'All books',
+      export_boq_xlsx: 'Export Summary BOQ (Excel)', export_cert_xlsx: 'Certificate (Excel)', xlsx_saved: 'Excel file ready', period: 'Period',
+      contractor_name: 'Contractor name', variation_total: 'Variation orders total', rebate_pct: 'Rebate %',
+      by_category: 'Category', by_mode: 'Payment mode', by_member: 'Member', by_contact: 'Contact', by_book: 'Book',
+      cf_delete_row: 'Delete “{name}”? This cannot be undone.', cf_pay_bill: 'Record payment of {amount} to {name}? This cannot be undone.',
+      cf_receive: 'Record {amount} received for {name}? This cannot be undone.', cf_wages: 'Mark wages of {total} for {from} – {to} as paid? This cannot be undone.',
+      cf_remove_pin: 'Remove the PIN lock? Anyone who opens the app will see your data.', cf_revoke: 'Revoke all invite codes for “{name}”? People who have not joined yet will need a new code.',
+      cf_remove_member: 'Remove {name} from “{book}”? They lose access to this book.', cf_signout: 'Sign out of online sync on this phone?',
+      add_sum_row: 'Add summary line', sum_row: 'Summary line', sum_label: 'Title (shown in the Summary sheet)', sum_default: '',
+      sum_note: 'One line of the Summary sheet: this title with the total of all items above it, back to the previous summary line. It is not counted again in the BoQ total.',
+      row_menu: 'Row options', insert_above: 'Insert item above', insert_below: 'Insert item below', sum_above: 'Insert summary line above', sum_below: 'Insert summary line below', add_group: 'Add group title', group_row: 'Group title', group_above: 'Insert group title above', group_below: 'Insert group title below', group_note: 'Starts a group in the Summary sheet (A, B, …). The group total is added when the next group starts or the list ends.', make_lines: 'Create summary lines from headings', make_lines_ask: 'Add a summary line at the end of every section that has priced items? You can edit or delete them afterwards.',
+      move_up: 'Move up', move_down: 'Move down',
+      add_row: 'Add row', add_row_type: 'Add row (any type)', row_type: 'Row type', rt_item: 'Item', rt_note: 'Plain row', rt_line: 'Summary line', rt_sum: 'Total carried to summary', rt_sum_tag: 'Total', rt_group: 'Group title',
+      rt_item_note: 'A priced row: quantity × rate. It is counted in the BoQ total.',
+      rt_note_note: 'A note or unpriced line. It stays a plain row and never reaches the Summary sheet.',
+      rt_line_note: 'A title for the Summary sheet, such as “1. Excavation and Earth Work”. Its value is the next “Total carried to summary” below it.',
+      rt_sum_note: 'Adds up the items above it, back to the previous “Total carried to summary”. It is not counted again in the BoQ total.',
+      rt_group_note: 'Starts a group in the Summary sheet (A, B, …). The group total is added when the next group starts or the list ends.',
+      line_no_total: 'No “Total carried to summary” below it yet',
+      variation_order_n: 'Variation order {n}', of_which: 'of which', contract_qty: 'Contract qty', executed_qty: 'Executed qty', exceed_qty: 'Exceed qty',
+      tax_settled: 'Tax settled (receipt entered)',
+      variation_orders: 'Extra items (not in BoQ)', add_variation: 'Add extra item', edit_variation: 'Edit extra item', work_excl_var: 'Work done (excl. variations)',
+      variation_note: 'Added to this certificate’s work before VAT.', variation_total_all: 'Variation orders (all certificates)',
+      cl_adv_repay: 'Advance repayment {p} – recovered', cl_adv_balance: 'Advance still to recover', cl_vat: 'VAT {p}', cl_retention: 'Retention {p} – held',
+      cl_wht: 'Withholding tax {p}', cl_vat_wht: 'VAT withheld {p} of VAT', cl_amounts_note: 'Amounts are totals from the certificates so far.',
+      about_desc: 'Cash books, projects, bills of quantities and payment certificates for contractors.', about_new_title: 'What’s new', about_help_title: 'How to',
+      about_new_1: 'Summary lines and group titles in the BoQ build the Summary sheet', about_new_2: 'Variation Order per certificate with its own Excel sheet',
+      about_new_3: 'Due from client counts tax once receipts are entered', about_new_4: 'Contractor name from project details on every sheet and printout', about_new_5: 'Confirmation before anything that cannot be undone',
+      about_help_1: 'Certificate: Projects → Client → ➕. Work before VAT + VAT − retention − advance repayment − penalty = net pay. Withholding and VAT withheld come off after it.',
+      about_help_2: 'Variation orders: when executed BoQ quantity goes over the contract quantity, the excess is shown as Variation order 1, 2, … on the certificate. For extra work not in the BoQ tap “Extra items”.',
+      about_help_3: 'BoQ: the ⋯ on a row inserts items or summary rows above or below, and moves rows. A summary row adds up the rows above it back to the previous one.',
+      about_help_4: 'Share a book: Entries → ⋮ on a book → Share with people. Sign in under Settings → Online sync first.',
+      about_help_5: 'Excel and PDF: certificate and Summary BOQ buttons are in Projects; the report export is in Reports.',
+      about_privacy: 'Your data stays on this phone. It goes online only if you sign in to Online sync.'
+    },
+    om: {
+      contacts: 'Quunnamtoota', contact: 'Quunnamtaa', add_contact: 'Quunnamtaa dabali', no_contacts: 'Ammaaf quunnamtaan hin jiru.',
+      kind_customer: 'Maamilaa', kind_supplier: 'Dhiyeessaa', kind_other: 'Kan biraa', contact_name: 'Maqaa', contact_phone: 'Bilbila',
+      payment_mode: 'Akkaataa kaffaltii', mode_cash: 'Maallaqa harkaa', mode_bank: 'Baankii', mode_mobile: 'Maallaqa bilbilaa', mode_cheque: 'Chequ', mode_other: 'Kan biraa',
+      member: 'Miseensa', business: 'Daldala', businesses: 'Daldalawwan', staff: 'Hojjettoota', reminders: 'Yaadachiisa', due_date: 'Guyyaa kaffaltii',
+      export_report: 'Gabaasa baasi', export_excel: 'Excel', export_pdf: 'PDF / maxxansi', export_boq_xlsx: 'Cuunfaa BOQ baasi (Excel)', export_cert_xlsx: 'Ragaa kaffaltii (Excel)'
+    },
+    am: {
+      contacts: 'እውቂያዎች', contact: 'እውቂያ', add_contact: 'እውቂያ ጨምር', no_contacts: 'ገና እውቂያ የለም።',
+      kind_customer: 'ደንበኛ', kind_supplier: 'አቅራቢ', kind_other: 'ሌላ', contact_name: 'ስም', contact_phone: 'ስልክ',
+      payment_mode: 'የክፍያ መንገድ', mode_cash: 'ጥሬ ገንዘብ', mode_bank: 'ባንክ', mode_mobile: 'ሞባይል ገንዘብ', mode_cheque: 'ቼክ', mode_other: 'ሌላ',
+      member: 'አባል', business: 'ንግድ', businesses: 'ንግዶች', staff: 'ሠራተኞች', reminders: 'ማስታወሻዎች', due_date: 'የመክፈያ ቀን',
+      export_report: 'ሪፖርት ላክ', export_excel: 'Excel', export_pdf: 'PDF / አትም', export_boq_xlsx: 'የBOQ ማጠቃለያ ላክ (Excel)', export_cert_xlsx: 'ሰርተፊኬት (Excel)'
+    }
+  };
+  Object.keys(add).forEach(function (lang) {
+    var d = window.CB_I18N[lang] || (window.CB_I18N[lang] = {});
+    Object.keys(add[lang]).forEach(function (k) { d[k] = add[lang][k]; });
+  });
+})();

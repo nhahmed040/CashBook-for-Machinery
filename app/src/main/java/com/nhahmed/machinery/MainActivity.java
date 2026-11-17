@@ -1,0 +1,397 @@
+package com.nhahmed.machinery;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.CancellationSignal;
+import android.os.Environment;
+import android.print.PrintAttributes;
+import android.print.PrintManager;
+import android.database.Cursor;
+import android.provider.ContactsContract;
+import android.provider.MediaStore;
+import android.webkit.JsResult;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Toast;
+
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
+
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
+
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
+/**
+ * Hosts the CashBook for Machinery web app (bundled from /web) inside a WebView.
+ * Everything runs offline. The Internet permission is only used by the optional online sync
+ * (Settings), and the page can ask for a Google sign-in token (Google blocks sign-in inside a WebView).
+ */
+public class MainActivity extends Activity {
+
+    private static final int REQ_PICK_FILE = 1001;
+    private static final int MAX_PHOTO_CHARS = 4000000;
+
+    private WebView web;
+    private WebView printView; // kept so the print job's WebView is not garbage-collected
+    private ValueCallback<Uri[]> filePathCallback;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        web = new WebView(this);
+        setContentView(web);
+
+        WebSettings s = web.getSettings();
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);      // localStorage for saved entries
+        s.setAllowFileAccess(false);       // bundled assets still load
+        s.setAllowContentAccess(true);     // needed to read the file picked for restore
+
+        web.addJavascriptInterface(new Bridge(), "AndroidBridge");
+
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                // Stay inside the bundled app; only phone and email links open the dialer / mail app.
+                String url = request.getUrl().toString();
+                if (url.startsWith("mailto:") || url.startsWith("tel:")) {
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, request.getUrl()));
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "No app found", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                }
+                return !url.startsWith("file:///android_asset/");
+            }
+        });
+
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setMessage(message)
+                        .setPositiveButton(android.R.string.ok, (d, w) -> result.confirm())
+                        .setNegativeButton(android.R.string.cancel, (d, w) -> result.cancel())
+                        .setOnCancelListener(d -> result.cancel())
+                        .show();
+                return true;
+            }
+
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
+                                             FileChooserParams params) {
+                if (filePathCallback != null) {
+                    filePathCallback.onReceiveValue(null);
+                }
+                filePathCallback = callback;
+                try {
+                    // Photos ask for "image/*"; the restore/import pickers use file extensions, so any file.
+                    String type = "*/*";
+                    String[] accept = params == null ? null : params.getAcceptTypes();
+                    if (accept != null && accept.length > 0 && accept[0] != null && accept[0].startsWith("image/")) {
+                        type = accept[0];
+                    }
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType(type);
+                    startActivityForResult(Intent.createChooser(intent, null), REQ_PICK_FILE);
+                } catch (Exception e) {
+                    filePathCallback = null;
+                    callback.onReceiveValue(null);
+                    return false;
+                }
+                return true;
+            }
+        });
+
+        web.loadUrl("file:///android_asset/index.html");
+    }
+
+    private static final int REQ_PICK_CONTACT = 9102;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_PICK_CONTACT) {
+            String name = "", phone = "";
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                // the picker grants read access to just the chosen contact: no contacts permission is needed
+                try (Cursor c = getContentResolver().query(data.getData(),
+                        new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER},
+                        null, null, null)) {
+                    if (c != null && c.moveToFirst()) {
+                        name = c.getString(0) == null ? "" : c.getString(0);
+                        phone = c.getString(1) == null ? "" : c.getString(1);
+                    }
+                } catch (Exception e) {
+                    name = "";
+                }
+            }
+            final String js = "window.__onPhoneContact && window.__onPhoneContact(" + JSONObject.quote(name) + "," + JSONObject.quote(phone) + ")";
+            if (web != null) {
+                web.evaluateJavascript(js, null);
+            }
+            return;
+        }
+        if (requestCode == REQ_PICK_FILE) {
+            if (filePathCallback != null) {
+                Uri[] result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+                filePathCallback.onReceiveValue(result);
+                filePathCallback = null;
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (web != null) {
+            web.destroy();
+        }
+        if (printView != null) {
+            printView.destroy();
+        }
+        super.onDestroy();
+    }
+
+    /** Shows the Google account chooser and hands the Google ID token back to the page. */
+    private void startGoogleSignIn(final String clientId) {
+        runOnUiThread(() -> {
+            try {
+                CredentialManager manager = CredentialManager.create(MainActivity.this);
+                GetSignInWithGoogleOption option = new GetSignInWithGoogleOption.Builder(clientId).build();
+                GetCredentialRequest request = new GetCredentialRequest.Builder().addCredentialOption(option).build();
+                manager.getCredentialAsync(MainActivity.this, request, new CancellationSignal(),
+                        command -> runOnUiThread(command),
+                        new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                            @Override
+                            public void onResult(GetCredentialResponse result) {
+                                Credential credential = result.getCredential();
+                                if (credential instanceof CustomCredential
+                                        && GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(credential.getType())) {
+                                    try {
+                                        GoogleIdTokenCredential google =
+                                                GoogleIdTokenCredential.createFrom(((CustomCredential) credential).getData());
+                                        deliverGoogle(google.getIdToken(), "");
+                                    } catch (Exception e) {
+                                        deliverGoogle("", "bad-credential");
+                                    }
+                                } else {
+                                    deliverGoogle("", "unsupported");
+                                }
+                            }
+
+                            @Override
+                            public void onError(GetCredentialException e) {
+                                deliverGoogle("", e.getClass().getSimpleName());
+                            }
+                        });
+            } catch (Throwable t) {
+                deliverGoogle("", "failed");
+            }
+        });
+    }
+
+    private void deliverGoogle(String token, String error) {
+        final String js = "window.__onGoogle && window.__onGoogle(" + JSONObject.quote(token) + "," + JSONObject.quote(error) + ")";
+        runOnUiThread(() -> {
+            if (web != null) {
+                web.evaluateJavascript(js, null);
+            }
+        });
+    }
+
+    private File photoFile(String id) {
+        // Ids are plain numbers; anything else is refused so a page can never reach other files.
+        if (id == null || !id.matches("[0-9]{1,20}")) {
+            return null;
+        }
+        File dir = new File(getFilesDir(), "photos");
+        if (!dir.exists() && !dir.mkdirs()) {
+            return null;
+        }
+        return new File(dir, id + ".txt");
+    }
+
+    /** Exposed to the page as window.AndroidBridge. */
+    private class Bridge {
+        /**
+         * Saves a text file to the phone.
+         * Returns a short description of where it went, or "" if saving failed.
+         */
+        @android.webkit.JavascriptInterface
+        public String saveFile(String name, String mime, String content) {
+            String type = "application/json".equals(mime) || "text/csv".equals(mime) ? mime : "text/plain";
+            byte[] data = (content == null ? "" : content).getBytes(StandardCharsets.UTF_8);
+            return writeDownload(name, type, data, "cashbook.txt");
+        }
+
+        /** Saves a binary file (an .xlsx workbook) given as base64. Returns where it went, or "". */
+        /** Opens the phone's contact picker; the choice comes back through window.__onPhoneContact(name, phone). */
+        @android.webkit.JavascriptInterface
+        public void pickContact() {
+            runOnUiThread(() -> {
+                try {
+                    Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+                    startActivityForResult(i, REQ_PICK_CONTACT);
+                } catch (Exception e) {
+                    web.evaluateJavascript("window.__onPhoneContact && window.__onPhoneContact('','')", null);
+                }
+            });
+        }
+
+        @android.webkit.JavascriptInterface
+        public String saveFileB64(String name, String mime, String base64) {
+            String type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(mime) ? mime : "application/octet-stream";
+            try {
+                byte[] data = android.util.Base64.decode(base64 == null ? "" : base64, android.util.Base64.DEFAULT);
+                return writeDownload(name, type, data, "cashbook.xlsx");
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        private String writeDownload(String name, String type, byte[] data, String fallbackName) {
+            String safe = name == null ? fallbackName : name.replaceAll("[^A-Za-z0-9._-]", "_");
+            if (safe.isEmpty()) {
+                safe = fallbackName;
+            }
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ContentResolver resolver = getContentResolver();
+                    ContentValues values = new ContentValues();
+                    values.put(MediaStore.MediaColumns.DISPLAY_NAME, safe);
+                    values.put(MediaStore.MediaColumns.MIME_TYPE, type);
+                    values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+                    Uri uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                    if (uri == null) {
+                        return "";
+                    }
+                    try (OutputStream out = resolver.openOutputStream(uri)) {
+                        if (out == null) {
+                            return "";
+                        }
+                        out.write(data);
+                    }
+                    return "Downloads/" + safe;
+                } else {
+                    File dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                    if (dir == null) {
+                        return "";
+                    }
+                    File file = new File(dir, safe);
+                    try (FileOutputStream out = new FileOutputStream(file)) {
+                        out.write(data);
+                    }
+                    return file.getAbsolutePath();
+                }
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        /** Starts the Google sign-in; the result comes back through window.__onGoogle(idToken, error). */
+        @android.webkit.JavascriptInterface
+        public void googleSignIn(String clientId) {
+            if (clientId != null && clientId.matches("[0-9A-Za-z._-]{10,200}")) {
+                startGoogleSignIn(clientId);
+            } else {
+                deliverGoogle("", "bad-client-id");
+            }
+        }
+
+        /** Opens Android's print dialog for an HTML document (choose "Save as PDF" there). */
+        @android.webkit.JavascriptInterface
+        public void printHtml(final String title, final String html) {
+            runOnUiThread(() -> {
+                try {
+                    final String name = title == null || title.isEmpty() ? "CashBook" : title;
+                    if (printView != null) {
+                        printView.destroy();
+                    }
+                    final WebView wv = new WebView(MainActivity.this);
+                    wv.getSettings().setJavaScriptEnabled(false);
+                    final boolean[] started = {false};
+                    wv.setWebViewClient(new WebViewClient() {
+                        @Override
+                        public void onPageFinished(WebView view, String url) {
+                            if (started[0]) {
+                                return;
+                            }
+                            started[0] = true;
+                            PrintManager pm = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+                            pm.print(name, view.createPrintDocumentAdapter(name), new PrintAttributes.Builder().build());
+                        }
+                    });
+                    printView = wv;
+                    wv.loadDataWithBaseURL(null, html == null ? "" : html, "text/html", "UTF-8", null);
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "Could not open the print dialog", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+        /** Stores a photo (a JPEG data URL) in the app's private files. Returns true on success. */
+        @android.webkit.JavascriptInterface
+        public boolean photoPut(String id, String dataUrl) {
+            File f = photoFile(id);
+            if (f == null || dataUrl == null || dataUrl.length() > MAX_PHOTO_CHARS || !dataUrl.startsWith("data:image/")) {
+                return false;
+            }
+            try (FileOutputStream out = new FileOutputStream(f)) {
+                out.write(dataUrl.getBytes(StandardCharsets.UTF_8));
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        /** Returns the stored photo data URL, or "" if there is none. */
+        @android.webkit.JavascriptInterface
+        public String photoGet(String id) {
+            File f = photoFile(id);
+            if (f == null || !f.isFile()) {
+                return "";
+            }
+            try {
+                return new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        @android.webkit.JavascriptInterface
+        public void photoDelete(String id) {
+            File f = photoFile(id);
+            if (f != null && f.isFile()) {
+                //noinspection ResultOfMethodCallIgnored
+                f.delete();
+            }
+        }
+    }
+}
