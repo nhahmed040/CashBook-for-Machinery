@@ -986,8 +986,7 @@
       var proposed = L.proposeCertGross(p);
       if (s.total <= 0 || proposed <= 0) { toast(t('nothing_to_certify')); return; }
       ui.section = 'client';
-      renderProjects();
-      editCert(p, null, { gross: proposed });
+        editCert(p, null, { gross: proposed });
     }));
     var row = el('div', 'btnrow');
     row.appendChild(btn(t('add_item'), '', function () { editRow(p, null, null, 'item'); }));
@@ -1843,19 +1842,18 @@
     renderReports();
     renderSettings();
     renderBiz();
-    renderReminders();
     renderBackupState();
     if (window.__renderCloud) window.__renderCloud();
   }
 
-  var VIEWS = ['entries', 'contacts', 'projects', 'machinery', 'reports', 'settings'];
+  var VIEWS = ['entries', 'contacts', 'machinery', 'reports', 'settings'];
   function showView(name) {
     ui.view = name;
     VIEWS.forEach(function (v) { $('view-' + v).hidden = v !== name; });
     Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) {
       b.classList.toggle('active', b.getAttribute('data-view') === name);
     });
-    document.body.classList.remove('view-entries', 'view-contacts', 'view-projects', 'view-machinery', 'view-reports', 'view-settings');
+    document.body.classList.remove('view-entries', 'view-contacts', 'view-machinery', 'view-reports', 'view-settings');
     document.body.classList.add('view-' + name);
     applyEntriesScreen();
     window.scrollTo(0, 0);
@@ -1886,9 +1884,9 @@
   }
 
   function refreshEntryLinks() {
-    var proj = projectOfBook(book());
+    var proj = null;
     var box = $('entryProject');
-    box.hidden = !proj;
+    box.hidden = true;
     if (!proj) return;
     var type = $('entryForm').elements.type.value === 'out' ? 'out' : 'in';
     $('linkLabel').textContent = type === 'out' ? t('pays_bill') : t('client_cert');
@@ -2349,7 +2347,6 @@
     });
     box.appendChild(pn);
   }
-  $('remindBanner').addEventListener('click', function () { showView('projects'); renderProjects(); });
 
   /* ---------- report export (Excel / PDF) for a date range ---------- */
   function exportRange() {
@@ -2412,7 +2409,6 @@
       if (v === 'entries' && ui.view === 'entries') ui.bookOpen = false;   // tapping Entries again goes back to the list of books
       showView(v);
       if (v === 'reports') renderReports();
-      if (v === 'projects') renderProjects();
       if (v === 'contacts') renderContacts();
     });
   });
