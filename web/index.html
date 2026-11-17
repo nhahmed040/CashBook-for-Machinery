@@ -116,13 +116,6 @@
       <p id="contactEmpty" class="empty" data-i18n="no_contacts">No contacts yet.</p>
     </section>
 
-    <!-- PROJECTS -->
-    <section id="view-projects" class="view" hidden>
-      <div id="remindBox"></div>
-      <div id="projList"></div>
-      <div id="projDetail" hidden></div>
-    </section>
-
     <!-- REPORTS -->
     <section id="view-reports" class="view" hidden>
       <div class="monthnav">
@@ -291,7 +284,7 @@
     <div class="modal">
       <h2 data-i18n="books">Books</h2>
       <input type="text" id="bookName" data-i18n-ph="book_name" placeholder="Book name" maxlength="40">
-      <label class="field"><span data-i18n="project">Project</span><select id="bookProject"></select></label>
+      <label class="field" hidden><span data-i18n="project">Project</span><select id="bookProject"></select></label>
       <label class="field" id="bookBizField"><span data-i18n="business">Business</span><select id="bookBiz"></select></label>
       <button type="button" id="newBook" class="primary block" data-i18n="new_book">New book</button>
       <button type="button" id="renameBook" class="block" data-i18n="rename_book">Rename</button>
@@ -305,7 +298,7 @@
     <div class="modal about">
       <div class="aboutlogo">📒</div>
       <h2>CashBook for Machinery</h2>
-      <p class="muted small" data-i18n="about_desc">Cash books, projects, bills of quantities and payment certificates for contractors.</p>
+      <p class="muted small" data-i18n="about_desc">Cash books and machinery fleet operations, income and expenses.</p>
       <dl class="aboutlist">
         <div><dt data-i18n="app_version">Version</dt><dd id="aboutVersion"></dd></div>
         <div><dt data-i18n="created_by">Created by</dt><dd>Nuh Ahmed</dd></div>
@@ -353,7 +346,7 @@
     </form>
   </div>
 
-  <!-- Generic form (projects, bills, certificates, workers, payments) -->
+  <!-- Generic form retained for legacy data compatibility -->
   <div id="formModal" class="overlay">
     <form id="formForm" class="modal" autocomplete="off">
       <h2 id="formTitle"></h2>
