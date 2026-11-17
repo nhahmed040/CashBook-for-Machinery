@@ -553,3 +553,5 @@ body.view-entries.books-home #bookBtn, body.view-entries.books-home .fab { displ
 .imp-group .stext b, .imp-line .stext b { font-weight: 700; }
 .imp-sum { background: rgba(90,79,240,.08); }
 .impmode label { display: flex; gap: 6px; align-items: center; margin: 6px 0; }
+
+body.view-machinery .fab{display:none}

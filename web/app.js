@@ -1848,14 +1848,14 @@
     if (window.__renderCloud) window.__renderCloud();
   }
 
-  var VIEWS = ['entries', 'contacts', 'projects', 'reports', 'settings'];
+  var VIEWS = ['entries', 'contacts', 'projects', 'machinery', 'reports', 'settings'];
   function showView(name) {
     ui.view = name;
     VIEWS.forEach(function (v) { $('view-' + v).hidden = v !== name; });
     Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) {
       b.classList.toggle('active', b.getAttribute('data-view') === name);
     });
-    document.body.classList.remove('view-entries', 'view-contacts', 'view-projects', 'view-reports', 'view-settings');
+    document.body.classList.remove('view-entries', 'view-contacts', 'view-projects', 'view-machinery', 'view-reports', 'view-settings');
     document.body.classList.add('view-' + name);
     applyEntriesScreen();
     window.scrollTo(0, 0);
