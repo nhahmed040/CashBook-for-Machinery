@@ -2459,8 +2459,27 @@
   $('closeBook').addEventListener('click', function () { closeModal('bookModal'); });
 
   /* About */
-  var APP_VERSION = '2.9.0', APP_BUILD = 23;
+  var APP_VERSION = '2.10.0', APP_BUILD = 24;
   $('aboutBtn').addEventListener('click', function () { $('aboutVersion').textContent = APP_VERSION + ' (build ' + APP_BUILD + ')'; openModal('aboutModal'); });
+  $('checkUpdates').addEventListener('click', async function () {
+    var button = this, original = button.textContent;
+    button.disabled = true; button.textContent = 'Checking…';
+    try {
+      var response = await fetch('https://api.github.com/repos/nhahmed040/CashBook-for-Machinery/releases/latest', {headers:{'Accept':'application/vnd.github+json'}});
+      if (response.status === 404) { alert('No published update is available yet. Please try again later.'); return; }
+      if (!response.ok) throw new Error('Update service returned ' + response.status);
+      var release = await response.json();
+      var latest = String(release.tag_name || '').replace(/^v/, '');
+      if (!latest || latest === APP_VERSION) { alert('Your app is up to date (version ' + APP_VERSION + ').'); return; }
+      var apk = (release.assets || []).find(function (asset) { return /CashBook-for-Machinery\.apk$/i.test(asset.name); });
+      if (!apk) { alert('A newer release was found, but its APK is not attached yet.'); return; }
+      if (confirm('Version ' + latest + ' is available. Open the download page? Back up your data before installing.')) {
+        if (window.AndroidBridge && window.AndroidBridge.openExternalUrl) window.AndroidBridge.openExternalUrl(apk.browser_download_url);
+        else window.open(apk.browser_download_url, '_blank');
+      }
+    } catch (error) { alert('Could not check for updates. Check your internet connection and try again.'); }
+    finally { button.disabled = false; button.textContent = original; }
+  });
   $('aboutBackup').addEventListener('click', function () { closeModal('aboutModal'); var b = $('backupBtn'); b.scrollIntoView({ block: 'center' }); b.click(); });
   $('closeAbout').addEventListener('click', function () { closeModal('aboutModal'); });
   $('aboutModal').addEventListener('click', function (e) { if (e.target === this) closeModal('aboutModal'); });
