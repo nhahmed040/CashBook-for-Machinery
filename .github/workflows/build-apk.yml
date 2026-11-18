@@ -92,8 +92,20 @@ jobs:
                 Key key = ks.getKey(alias, keyPassword.toCharArray());
                 if (key == null) throw new Exception("No key returned");
                 System.out.println("SIGNING CHECK: private key decrypted successfully.");
-              } catch (Exception e) {
-                System.err.println("SIGNING CHECK: alias exists, but KEY_PASSWORD cannot decrypt its private key.");
+              } catch (Exception rawFailure) {
+                String trimmedPassword = keyPassword.trim();
+                if (!trimmedPassword.equals(keyPassword)) {
+                  try {
+                    Key key = ks.getKey(alias, trimmedPassword.toCharArray());
+                    if (key != null) {
+                      System.err.println("SIGNING CHECK: KEY_PASSWORD works only after trimming leading/trailing whitespace. Correct the GitHub secret; no secret value was printed.");
+                      System.exit(15);
+                    }
+                  } catch (Exception trimmedFailure) {
+                    // Keep the diagnostic generic; never print credential data.
+                  }
+                }
+                System.err.println("SIGNING CHECK: alias exists, but KEY_PASSWORD cannot decrypt its private key. Check that the secret matches this keystore exactly.");
                 System.exit(14);
               }
             }
