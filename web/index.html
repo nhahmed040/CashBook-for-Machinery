@@ -210,39 +210,7 @@
     </section>
 
     <section id="view-machinery" class="view" hidden>
-      <div class="panel"><h2>Fleet overview</h2><div class="summary">
-        <div class="card balance"><span class="label">Machines</span><span class="value" id="fleetCount">0</span></div>
-        <div class="card in"><span class="label">Income</span><span class="value" id="fleetIncome">ETB 0</span></div>
-        <div class="card out"><span class="label">Expenses</span><span class="value" id="fleetExpenses">ETB 0</span></div>
-      </div>
-        <div class="fleet-filter-panel">
-          <div class="row">
-            <label class="field"><span>From date</span><input type="date" id="fleetFromDate"></label>
-            <label class="field"><span>To date</span><input type="date" id="fleetToDate"></label>
-          </div>
-          <div class="row">
-            <label class="field"><span>Machine</span><select id="fleetMachineFilter"><option value="all">All machines</option></select></label>
-            <button type="button" id="fleetClearFilters">Clear filters</button>
-          </div>
-        </div>
-        <p class="muted" id="fleetProfit">Net operating result: ETB 0</p></div>
-      <div class="panel"><h2 id="machineFormTitle">Register a machine</h2><form id="machineForm" class="stack">
-        <input id="machineName" required maxlength="60" placeholder="Machine name (e.g. Dump Truck 01)">
-        <div class="row"><select id="machineType"><option>Dump truck / tipper</option><option>Wheel loader</option><option>Excavator</option><option>Bulldozer</option><option>Motor grader</option><option>Roller / compactor</option><option>Water truck</option><option>Crane</option><option>Other</option></select><input id="machinePlate" maxlength="24" placeholder="Plate / fleet ID"></div>
-        <div class="row"><input id="machineMake" maxlength="40" placeholder="Make / model"><input id="machineCapacity" maxlength="30" placeholder="Capacity (e.g. 20 m³)"></div>
-        <div class="row"><select id="machineOwnership"><option>Owned</option><option>Leased</option><option>Hired</option></select><select id="machineStatus"><option>Available</option><option>Working</option><option>Under Maintenance</option><option>Breakdown</option><option>Inactive</option></select></div>
-        <div class="row"><select id="machineRateMode"><option value="hour">Hourly</option><option value="day">Daily</option><option value="month">Monthly</option><option value="trip">Per trip</option><option value="km">Per kilometre</option><option value="tonne">Per tonne</option></select><input id="machineRate" type="number" min="0" step="0.01" required placeholder="Rate (ETB)"></div>
-        <div class="row"><button class="primary" id="machineSaveButton" type="submit">Save machine</button><button type="button" id="machineCancelEdit" hidden>Cancel edit</button></div></form></div>
-      <div class="panel"><h2>Daily operation / income</h2><form id="operationForm" class="stack">
-        <select id="operationMachine" required></select><div class="row"><input id="operationDate" type="date" required><input id="operationSite" maxlength="60" placeholder="Project / site"></div>
-        <div class="row"><input id="operationQuantity" type="number" min="0.01" step="0.01" required placeholder="Quantity (hours / days / trips / km / tonnes)"><input id="operationOperator" maxlength="50" placeholder="Operator / driver"></div>
-        <input id="operationNote" maxlength="100" placeholder="Description / notes"><button class="primary" type="submit">Record operation and income</button></form></div>
-      <div class="panel"><h2>Machine expense</h2><form id="expenseForm" class="stack">
-        <select id="expenseMachine" required></select><div class="row"><input id="expenseDate" type="date" required><select id="expenseType"><option>Fuel</option><option>Lubricants</option><option>Maintenance</option><option>Repair / breakdown</option><option>Tyres</option><option>Spare parts</option><option>Operator wages</option><option>Transport</option><option>Other</option></select></div>
-        <div class="row"><input id="expenseAmount" type="number" min="0.01" step="0.01" required placeholder="Cost (ETB)"><input id="expenseQuantity" type="number" min="0" step="0.01" placeholder="Quantity / litres (optional)"></div>
-        <input id="expenseNote" maxlength="100" placeholder="Supplier / details"><button class="primary" type="submit">Save expense</button></form></div>
-      <div class="panel"><h2>Fleet register</h2><div id="machineList"></div></div>
-      <div class="panel"><h2>Recent operations and expenses</h2><div id="fleetTransactions"></div></div>
+      <div id="machineryApp"></div>
     </section>
   </main>
 
