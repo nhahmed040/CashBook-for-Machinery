@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed only to attach the APK to a release on v* tags
+      contents: write
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -33,10 +33,32 @@ jobs:
       - name: Check JavaScript syntax
         run: for f in web/*.js; do node --check "$f"; done
 
-      - name: Build debug APK
+      - name: Decode permanent release keystore
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > "${{ runner.temp }}/cashbook-release.jks"
+
+      - name: Build signed release APK
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        env:
+          RELEASE_STORE_FILE: ${{ runner.temp }}/cashbook-release.jks
+          RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle assembleRelease --no-daemon
+
+      - name: Build debug APK when signing secrets are not configured
+        if: ${{ secrets.KEYSTORE_BASE64 == '' }}
         run: gradle assembleDebug --no-daemon
 
       - name: Rename APK
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        run: cp app/build/outputs/apk/release/app-release.apk CashBook-for-Machinery.apk
+
+      - name: Rename debug APK
+        if: ${{ secrets.KEYSTORE_BASE64 == '' }}
         run: cp app/build/outputs/apk/debug/app-debug.apk CashBook-for-Machinery.apk
 
       - name: Upload APK artifact
