@@ -325,6 +325,16 @@ public class MainActivity extends Activity {
             }
         }
 
+        /** Opens a trusted HTTPS release asset in the Android browser. */
+        @android.webkit.JavascriptInterface
+        public void openExternalUrl(String url) {
+            if (url == null || !url.startsWith("https://github.com/nhahmed040/CashBook-for-Machinery/releases/")) return;
+            runOnUiThread(() -> {
+                try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); }
+                catch (Exception e) { Toast.makeText(MainActivity.this, "Could not open the download link", Toast.LENGTH_LONG).show(); }
+            });
+        }
+
         /** Opens Android's print dialog for an HTML document (choose "Save as PDF" there). */
         @android.webkit.JavascriptInterface
         public void printHtml(final String title, final String html) {
