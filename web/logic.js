@@ -96,7 +96,9 @@
       photos: photoIds(e.photos),
       mode: MODES.indexOf(e.mode) >= 0 ? e.mode : '',
       by: str(e.by, 40),
-      contactId: validId(e.contactId) ? e.contactId : 0
+      contactId: validId(e.contactId) ? e.contactId : 0,
+      machineSourceType: str(e.machineSourceType, 20),
+      machineSourceId: str(e.machineSourceId, 60)
     };
   }
   function uniqueEntries(list) { return mapList(list, sanitizeEntry); }
@@ -308,7 +310,7 @@
       v: 3,
       current: 'main',
       settings: { lang: 'en', currency: 'ETB', theme: 'system', calendar: 'gregorian', pinHash: '', pinSalt: '' },
-      books: [{ id: 'main', name: 'Main', projectId: '', businessId: '', entries: [] }],
+      books: [{ id: 'main', name: 'Main', projectId: '', businessId: '', machineId: '', entries: [] }],
       projects: [],
       contacts: [],
       businesses: [],
@@ -433,6 +435,7 @@
           name: str(b.name, 40) || ('Book ' + (books.length + 1)),
           projectId: pIds[b.projectId] ? b.projectId : '',
           businessId: bSeen[b.businessId] ? b.businessId : '',
+          machineId: str(b.machineId, 60),
           updated: isDate(b.updated) ? b.updated : '',
           entries: uniqueEntries(b.entries).map(function (e) { if (e.contactId && !cIds[e.contactId]) e.contactId = 0; return e; })
         };
