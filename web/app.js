@@ -770,6 +770,20 @@
     b.entries.forEach(function (e) {
       if (e.category && !seen[e.category]) { seen[e.category] = true; cl.appendChild(option(e.category, '')); }
     });
+    var oldReceivables = document.getElementById('machineReceivables');
+    if (oldReceivables && oldReceivables.parentNode) oldReceivables.parentNode.removeChild(oldReceivables);
+    if (b.machineId) {
+      var panel = el('section', 'mach-panel'); panel.id = 'machineReceivables';
+      panel.appendChild(el('h3', null, 'Earned income — not cash received'));
+      var records = [];
+      try { var ms = JSON.parse(localStorage.getItem('cashbook.machinery.v1') || '{}'); records = (ms.trips || []).filter(function (x) { return x.machineId === b.machineId; }); } catch (ignore) {}
+      records.sort(function (x,y) { return String(y.date || '').localeCompare(String(x.date || '')); });
+      var totalEarned = records.reduce(function (sum,x) { return sum + (Number(x.amount) || 0); }, 0);
+      panel.appendChild(el('p', 'mach-note', 'Total earned: ' + money(totalEarned) + ' · This amount does not increase the cash balance.'));
+      if (!records.length) panel.appendChild(el('p', 'mach-note', 'No completed trips recorded for this machine yet.'));
+      records.forEach(function (x) { var row = el('div', 'mach-record'); row.appendChild(el('b', null, (x.ticket || 'Completed trip') + ' · ' + money(Number(x.amount) || 0))); row.appendChild(el('span', null, (x.date || '') + ' · ' + (x.customerName || '') + ' · ' + (x.material || ''))); panel.appendChild(row); });
+      list.parentNode.insertBefore(panel, list.nextSibling);
+    }
   }
 
   function renderBars(container, rows, cls) {
@@ -3327,7 +3341,7 @@
       openForm({ title: t('m_business'), fields: [{ key: 'b', label: t('business'), type: 'select', options: opts, value: b.businessId || '' }],
         onSubmit: function (v) { b.businessId = v.b; save(); renderAll(); return null; } });
     } });
-    items.push({ label: t('m_delete'), danger: true, run: function () {
+    if (!b.machineId) items.push({ label: t('m_delete'), danger: true, run: function () {
       if (state.books.length < 2) { toast(t('last_book')); return; }
       function proceed() {
         dropPaymentsOfBook(b.id);
@@ -3418,4 +3432,26 @@
   purgeExpiredTrashPhotos();
   renderAll();
   showLock();
+
+  // Bridge for the Machinery module: every machine has a dedicated CashBook.
+  window.CBMachineBooks = {
+    ensure: function (machine) {
+      if (!machine || !machine.id) return null;
+      var found = state.books.filter(function (x) { return x.machineId === String(machine.id); })[0];
+      if (found) { machine.cashBookId = found.id; return found.id; }
+      var id = 'm' + L.newId();
+      found = { id: id, name: String(machine.name || 'Machine').slice(0, 30) + ' Cash Book', projectId: '', businessId: '', machineId: String(machine.id), updated: L.todayStr(), entries: [] };
+      state.books.push(found); machine.cashBookId = found.id;
+      save(); renderAll(); return found.id;
+    },
+    postCash: function (machine, sourceType, sourceId, data) {
+      var bookId = this.ensure(machine), target = bookById(bookId);
+      if (!target || !sourceId || !data || !(Number(data.amount) > 0)) return false;
+      var key = String(sourceType || '') + ':' + String(sourceId);
+      if (target.entries.some(function (e) { return e.machineSourceId === key; })) return true;
+      var entry = L.sanitizeEntry({ id: L.newId(), type: data.type === 'out' ? 'out' : 'in', amount: Number(data.amount), date: data.date, category: data.category, note: data.note, party: data.party, mode: data.mode || '', by: data.by || 'Machinery', machineSourceType: String(sourceType || ''), machineSourceId: key });
+      if (!entry) return false;
+      target.entries.push(entry); save(); renderAll(); return true;
+    }
+  };
 })();
