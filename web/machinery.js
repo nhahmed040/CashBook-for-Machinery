@@ -7,7 +7,7 @@ var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){r
 var money=function(n){return 'ETB '+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});};
 var state=load(), activeTab='dashboard', editing=null;
 function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||'{}');return {machines:Array.isArray(x.machines)?x.machines:[],operations:Array.isArray(x.operations)?x.operations:[],expenses:Array.isArray(x.expenses)?x.expenses:[],trips:Array.isArray(x.trips)?x.trips:[],customers:Array.isArray(x.customers)?x.customers:[],drivers:Array.isArray(x.drivers)?x.drivers:[],payments:Array.isArray(x.payments)?x.payments:[],maintenance:Array.isArray(x.maintenance)?x.maintenance:[]};}catch(e){return {machines:[],operations:[],expenses:[],trips:[],customers:[],drivers:[],payments:[],maintenance:[]};}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){alert('Unable to save. Phone storage may be full.');}}
+function save(){try{var serialized=JSON.stringify(state);localStorage.setItem(KEY,serialized);if(localStorage.getItem(KEY)!==serialized)throw new Error('Save verification failed');return true;}catch(e){alert('Unable to safely save machinery records. Phone storage may be full. Export a full backup and free storage before continuing.');return false;}}
 function total(a){return a.reduce(function(s,x){return s+(Number(x.amount)||0);},0);}
 function machine(id){return state.machines.find(function(x){return x.id===id;});}
 function customer(id){return state.customers.find(function(x){return x.id===id;});}
