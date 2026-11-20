@@ -1872,6 +1872,47 @@
     window.scrollTo(0, 0);
   }
 
+  // Android Back navigation: close transient UI before leaving a screen.
+  window.__handleAndroidBack = function () {
+    var lock = $('lock');
+    if (lock && lock.classList.contains('open')) return true;
+
+    var form = $('formModal');
+    if (form && form.classList.contains('open')) {
+      $('formCancel').click();
+      return true;
+    }
+    var pin = $('pinModal');
+    if (pin && pin.classList.contains('open')) {
+      $('cancelPin').click();
+      return true;
+    }
+
+    var overlays = document.querySelectorAll('.overlay.open');
+    if (overlays.length) {
+      var top = overlays[overlays.length - 1];
+      if (top.parentNode) top.parentNode.removeChild(top);
+      return true;
+    }
+    var modals = document.querySelectorAll('.modal.open');
+    if (modals.length) {
+      modals[modals.length - 1].classList.remove('open');
+      return true;
+    }
+
+    if (ui.bookOpen) {
+      ui.bookOpen = false;
+      renderAll();
+      window.scrollTo(0, 0);
+      return true;
+    }
+    if (ui.view !== 'entries') {
+      showView('entries');
+      return true;
+    }
+    return false;
+  };
+
   /* ---------- entry add / edit ---------- */
   var editingEntry = null;
   var entryPhotoSt = newPhotoState([]);
