@@ -56,7 +56,7 @@ root.innerHTML=nav()+body;
 }
 function sortDate(a,b){return String(b.date||'').localeCompare(String(a.date||''));}
 function machineOptions(){return '<option value="">Choose machine</option>'+state.machines.filter(function(m){return m.status!=='Inactive';}).map(function(m){return '<option value="'+esc(m.id)+'">'+esc(m.name)+' · '+esc(m.plate||m.type)+'</option>';}).join('');}
-function tripRows(rows){if(!rows.length)return '<p class="mach-note">No trip records yet.</p>';return rows.map(function(t){var m=machine(t.machineId),c=customer(t.customerId),d=driver(t.driverId);return '<div class="mach-record"><div class="mach-record-top"><b>'+esc(t.ticket||'Trip')+' · '+money(t.amount)+'</b><small>'+esc(t.date)+'</small></div><span>'+esc(m?m.name:'Machine')+' · '+esc(c?c.name:'Customer')+'</span><span>'+esc(t.material)+' · '+(Number(t.tripCount)||1)+' trip(s)'+(t.quantity?' · '+esc(t.quantity)+' '+esc(t.unit):'')+'</span><span>'+esc(t.origin||'')+' → '+esc(t.destination||'')+'</span><span>Driver: '+esc(d?d.name:'Not assigned')+'</span><span>Earned revenue · not necessarily paid</span></div>';}).join('');}
+function tripRows(rows){if(!rows.length)return '<p class="mach-note">No trip records yet.</p>';return rows.map(function(t){var m=machine(t.machineId),c=customer(t.customerId),d=driver(t.driverId);return '<div class="mach-record"><div class="mach-record-top"><b>'+esc(t.ticket||'Trip')+' · '+money(t.amount)+'</b><small>'+esc(t.date)+'</small></div><span>'+esc(m?m.name:'Machine')+' · '+esc(c?c.name:'Customer')+'</span><span>'+esc(t.material)+' · '+(Number(t.tripCount)||1)+' trip(s)'+(t.quantity?' · '+esc(t.quantity)+' '+esc(t.unit):'')+'</span><span>'+esc(t.origin||'')+' → '+esc(t.destination||'')+'</span><span>Driver: '+esc(d?d.name:'Not assigned')+'</span><span>Rate: '+money(t.rate)+' '+esc(t.basis==='trip'?'per trip':t.basis==='tonne'?'per tonne':'per m³')+'</span><span>Earned revenue · not necessarily paid</span>'+editButton('trip',t.id)+'</div>';}).join('');}
 
 function editButton(kind,id){return '<button type="button" class="secondary" data-edit-kind="'+kind+'" data-edit-id="'+esc(id)+'">Edit</button>';}
 function field(label,name,value,type){return '<label>'+label+'<input name="'+name+'" type="'+(type||'text')+'" value="'+esc(value==null?'':value)+'"></label>';}
@@ -72,6 +72,9 @@ function editorPanel(){
   title='Edit driver register'; f=field('Full name','name',x.name)+field('Phone','phone',x.phone)+field('Licence / ID','licence',x.licence);
  }else if(editing.kind==='customer'){
   title='Edit customer account'; f=field('Customer name','name',x.name)+field('Phone','phone',x.phone)+field('Address','address',x.address)+field('Tax ID','taxId',x.taxId);
+ }else if(editing.kind==='trip'){
+  title='Edit completed trip';
+  f=pick('Machine','machineId',state.machines.map(function(v){return {value:v.id,label:v.name};}),x.machineId)+field('Date','date',x.date,'date')+pick('Customer','customerId',state.customers.map(function(v){return {value:v.id,label:v.name};}),x.customerId)+pick('Driver','driverId',[{value:'',label:'Not assigned'}].concat(state.drivers.map(function(v){return {value:v.id,label:v.name};})),x.driverId)+field('Ticket / reference','ticket',x.ticket)+pick('Material','material',['Sand','Stone','Aggregate','Gravel','Soil','Crushed stone','Other'].map(function(v){return {value:v,label:v};}),x.material)+field('Number of trips','tripCount',x.tripCount,'number')+field('Load quantity','quantity',x.quantity,'number')+pick('Quantity unit','unit',['m³','tonne','load'].map(function(v){return {value:v,label:v};}),x.unit)+pick('Rate basis','basis',['trip','tonne','m3'].map(function(v){return {value:v,label:{trip:'Per trip',tonne:'Per tonne',m3:'Per m³'}[v]};}),x.basis)+field('Rate (ETB)','rate',x.rate,'number')+field('Loading point','origin',x.origin)+field('Destination','destination',x.destination)+field('Notes','note',x.note);
  }else if(editing.kind==='payment'){
   title='Edit customer payment';
   f=pick('Machine','machineId',state.machines.map(function(v){return {value:v.id,label:v.name};}),x.machineId)+pick('Customer','customerId',state.customers.map(function(v){return {value:v.id,label:v.name};}),x.customerId)+field('Payment date','date',x.date,'date')+field('Amount (ETB)','amount',x.amount,'number')+pick('Payment method','method',['Cash','Bank transfer','Mobile money','Cheque','Other'].map(function(v){return {value:v,label:v};}),x.method)+field('Receipt / reference','reference',x.reference)+field('Notes','note',x.note);
@@ -81,9 +84,14 @@ function editorPanel(){
  }
  return '<div class="mach-panel"><h3>'+title+'</h3><form id="editRecordForm" class="mach-form"><input type="hidden" name="kind" value="'+editing.kind+'"><input type="hidden" name="id" value="'+esc(x.id)+'"><div class="mach-two">'+f+'</div><div class="mach-two"><button class="primary" type="submit">Save changes</button><button class="secondary" type="button" data-edit-cancel>Cancel</button></div><p class="mach-note">Financial edits update the linked machine CashBook entry; they do not create a second payment or expense.</p></form></div>';
 }
-function byKind(kind,id){var key={machine:'machines',driver:'drivers',customer:'customers',payment:'payments',expense:'expenses'}[kind];return key?state[key].find(function(v){return v.id===id;}):null;}
+function byKind(kind,id){var key={machine:'machines',driver:'drivers',customer:'customers',payment:'payments',expense:'expenses',trip:'trips'}[kind];return key?state[key].find(function(v){return v.id===id;}):null;}
 function updateRecord(kind,id,v){
  var x=byKind(kind,id);if(!x)return false;
+ if(kind==='trip'){
+  var tm=machine(v.machineId),tc=customer(v.customerId),cnt=Math.max(1,Math.floor(Number(v.tripCount)||1)),qty=Number(v.quantity)||0,rate=Number(v.rate)||0;
+  if(!tm||!tc||!v.date||!(rate>0)||(v.basis!=='trip'&&!(qty>0)))return false;
+  x.machineId=tm.id;x.cashBookId=machineBook(tm);x.customerId=tc.id;x.customerName=tc.name;x.driverId=v.driverId||'';x.date=v.date;x.ticket=v.ticket;x.material=v.material;x.tripCount=cnt;x.quantity=qty;x.unit=v.unit;x.basis=v.basis;x.rate=rate;x.amount=(v.basis==='trip'?cnt:qty)*rate;x.origin=v.origin;x.destination=v.destination;x.note=v.note;x.updated=new Date().toISOString();return true;
+ }
  if(kind==='payment'||kind==='expense'){
   var oldMachine=machine(x.machineId),newMachine=machine(v.machineId),amount=Number(v.amount);
   if(!oldMachine||!newMachine||!(amount>0)||!v.date)return false;
@@ -96,7 +104,7 @@ function updateRecord(kind,id,v){
  }
  ['name','phone','licence','address','taxId','type','plate','make','capacity','ownership','status','rateMode'].forEach(function(k){if(v[k]!=null)x[k]=v[k];});
  if(kind==='machine'){x.rate=Number(v.rate)||0;if(window.CBMachineBooks&&window.CBMachineBooks.rename)window.CBMachineBooks.rename(x);}
- if(kind==='customer'){for(var i=0;i<state.payments.length;i++){var p=state.payments[i],pm=machine(p.machineId);if(pm&&p.customerId===x.id&&window.CBMachineBooks&&window.CBMachineBooks.updateCash){var ok=window.CBMachineBooks.updateCash(pm,pm,'payment',p.id,{type:'in',amount:p.amount,date:p.date,category:'Customer payment',party:x.name,note:(p.method||'Cash')+(p.reference?' · '+p.reference:'')+(p.note?' · '+p.note:'')});if(!ok)return false;}}}
+ if(kind==='customer'){state.trips.forEach(function(t){if(t.customerId===x.id)t.customerName=x.name;});for(var i=0;i<state.payments.length;i++){var p=state.payments[i],pm=machine(p.machineId);if(pm&&p.customerId===x.id&&window.CBMachineBooks&&window.CBMachineBooks.updateCash){var ok=window.CBMachineBooks.updateCash(pm,pm,'payment',p.id,{type:'in',amount:p.amount,date:p.date,category:'Customer payment',party:x.name,note:(p.method||'Cash')+(p.reference?' · '+p.reference:'')+(p.note?' · '+p.note:'')});if(!ok)return false;}}}
  x.updated=new Date().toISOString();return true;
 }
 
