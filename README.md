@@ -18,7 +18,7 @@ A simple, offline cash book for Android (and the browser). Record cash in and ca
 - **Add, edit and delete entries** (tap an entry to edit it)
 - **Search and filters** by category, remark, type and date range
 - **Reports**: monthly totals, cash in/out by category, and a 6-month chart
-- **Backup and restore**: save all data to a `.json` file and load it on another phone; CSV files can be imported into the current book. Photos are backed up separately (Settings → Backup photos) and restored with the same Restore button
+- **Backup and restore**: save all cash books, projects, contacts, photos, and machinery records (machines, trips, customers, drivers, payments, expenses and operations) together in one `.json` file. Older backup files remain supported; restoring an older CashBook-only backup leaves existing machinery records untouched. CSV files can be imported into the current book.
 - **Export** the current book to CSV (saved to Downloads)
 - **Dark mode** (follows the system, or choose light/dark)
 - **PIN lock** (4–8 digits; locks again when you leave the app)
