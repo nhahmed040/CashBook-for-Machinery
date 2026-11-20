@@ -3121,6 +3121,8 @@
       timer = setTimeout(function () { syncAll(false); }, ms == null ? 2500 : ms);
     }
     window.__scheduleSync = function () { schedule(); };
+    // Resume optional sync when connectivity returns; offline edits remain saved locally.
+    window.addEventListener('online', function () { if (ready()) schedule(1000); });
     window.__syncNow = function () { return syncAll(true); };
 
     /* deleting a synced book also removes (owner) or leaves (member) the online copy, otherwise it would come back */
@@ -3139,6 +3141,8 @@
       var copy = JSON.parse(JSON.stringify(state));
       delete copy.settings.pinHash; delete copy.settings.pinSalt;
       copy.books.forEach(function (b) { delete b.sync; delete b.nolink; });
+      // Cloud backup must include the separate fleet database as well as the main CashBook.
+      copy.machinery = window.CBMachineryData ? window.CBMachineryData.exportData() : null;
       return JSON.stringify(copy);
     }
     function backupNow(quiet) {
@@ -3153,12 +3157,23 @@
         if (!b || typeof b.data !== 'string') { toast(t('cloud_no_backup')); return; }
         if (!window.confirm(t('cloud_restore_confirm'))) return;
         var parsed = JSON.parse(b.data);
+        if (!parsed || !Array.isArray(parsed.books)) throw new Error('invalid cloud backup');
+        if (parsed.machinery && window.CBMachineryData && !window.CBMachineryData.validate(parsed.machinery)) throw new Error('invalid cloud fleet backup');
         var next = L.sanitizeState(parsed, { keepPin: false });
         next.settings.pinHash = state.settings.pinHash;
         next.settings.pinSalt = state.settings.pinSalt;
         next.books.forEach(function (nb) { nb.nolink = true; });      // restored copies stay on this phone until you sync them again
+        var previous = { cashbook: state, machinery: window.CBMachineryData ? window.CBMachineryData.exportData() : null };
+        try { localStorage.setItem(PREREST_KEY, JSON.stringify(previous)); } catch (e) { /* keep current data in memory if rollback storage is full */ }
+        if (parsed.machinery && window.CBMachineryData && !window.CBMachineryData.importData(parsed.machinery)) throw new Error('could not restore cloud fleet backup');
         state = next; ui.projectId = ''; ui.month = cal().monthKey(L.todayStr());
-        save(); renderAll(); toast(t('restored'));
+        if (!save()) {
+          state = previous.cashbook;
+          if (previous.machinery && window.CBMachineryData) window.CBMachineryData.importData(previous.machinery);
+          renderAll();
+          throw new Error('cloud restore could not be saved; previous data was reinstated');
+        }
+        renderAll(); toast(t('restored'));
       }).catch(fail);
     }
 
