@@ -75,4 +75,43 @@ if(migrated)save();
 document.querySelectorAll('.tabs button[data-view="machinery"]').forEach(function(b){b.addEventListener('click',render);});
 document.addEventListener('visibilitychange',function(){if(!document.hidden)render();});
 render();
+  // Versioned bridge used by the main CashBook backup/restore workflow.
+  // Machinery remains fully local; this does not enable network sync.
+  window.CBMachineryData = {
+    exportData: function () {
+      return JSON.parse(JSON.stringify({
+        schemaVersion: 1,
+        machines: state.machines,
+        operations: state.operations,
+        expenses: state.expenses,
+        trips: state.trips,
+        customers: state.customers,
+        drivers: state.drivers,
+        payments: state.payments
+      }));
+    },
+    validate: function (raw) {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+      var keys = ['machines','operations','expenses','trips','customers','drivers','payments'];
+      return keys.every(function (key) { return raw[key] == null || Array.isArray(raw[key]); });
+    },
+    importData: function (raw) {
+      if (!this.validate(raw)) return false;
+      var next = {};
+      ['machines','operations','expenses','trips','customers','drivers','payments'].forEach(function (key) {
+        next[key] = Array.isArray(raw[key]) ? raw[key] : [];
+      });
+      try {
+        var serialized = JSON.stringify(next);
+        // Persist first. Only replace the live state after storage accepts the full payload.
+        localStorage.setItem(KEY, serialized);
+        state = next;
+        render();
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+  };
+
 })();

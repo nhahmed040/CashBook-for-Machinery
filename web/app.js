@@ -2665,16 +2665,27 @@
   function dataCount() {
     var n = 0;
     state.books.forEach(function (b) { n += b.entries.length; });
-    return { entries: n, projects: state.projects.length, contacts: state.contacts.length };
+    var m = window.CBMachineryData ? window.CBMachineryData.exportData() : null;
+    return {
+      entries: n, projects: state.projects.length, contacts: state.contacts.length,
+      machines: m ? m.machines.length : 0, trips: m ? m.trips.length : 0,
+      machineryExpenses: m ? m.expenses.length : 0, machineryPayments: m ? m.payments.length : 0
+    };
   }
-  function hasData() { var c = dataCount(); return c.entries + c.projects + c.contacts > 0; }
+  function hasData() {
+    var c = dataCount();
+    return c.entries + c.projects + c.contacts + c.machines + c.trips + c.machineryExpenses + c.machineryPayments > 0;
+  }
 
   function buildBackup() {
     var copy = JSON.parse(JSON.stringify(state));
     copy.settings.pinHash = '';
     copy.settings.pinSalt = '';
-    copy.backupVersion = 2;
+    copy.backupVersion = 3;
     copy.savedAt = new Date().toISOString();
+    // Include the separate fleet database in the same portable backup.
+    // Older backups without this property remain valid and do not erase current fleet data.
+    copy.machinery = window.CBMachineryData ? window.CBMachineryData.exportData() : null;
     copy.photos = {};
     var ids = allPhotoIds();
     return Promise.all(ids.map(function (id) {
@@ -2690,7 +2701,11 @@
       var ok = saveFile('cashbook-backup-' + L.todayStr() + '.json', 'application/json', r.text);
       if (ok) {
         var c = dataCount();
-        setBackupInfo({ last: Date.now(), entries: c.entries, projects: c.projects, photos: r.photos, snooze: 0 });
+        setBackupInfo({
+          last: Date.now(), entries: c.entries, projects: c.projects, contacts: c.contacts,
+          machines: c.machines, trips: c.trips, machineryExpenses: c.machineryExpenses,
+          machineryPayments: c.machineryPayments, photos: r.photos, snooze: 0
+        });
         renderBackupState();
       }
       return ok;
@@ -2787,11 +2802,17 @@
   $('prerestoreBtn').addEventListener('click', function () {
     var raw = null;
     try { raw = JSON.parse(localStorage.getItem(PREREST_KEY) || 'null'); } catch (e) { /* ignore */ }
-    if (!raw || !Array.isArray(raw.books)) { toast(t('restore_fail')); return; }
+    if (!raw) { toast(t('restore_fail')); return; }
+    // Version 2.12+ stores an envelope so both CashBook and fleet data can be rolled back.
+    var previousCashBook = raw.cashbook && Array.isArray(raw.cashbook.books) ? raw.cashbook : raw;
+    if (!Array.isArray(previousCashBook.books)) { toast(t('restore_fail')); return; }
     if (!window.confirm(t('prerestore_confirm'))) return;
-    var next = L.sanitizeState(raw, { keepPin: false });
+    var next = L.sanitizeState(previousCashBook, { keepPin: false });
     next.settings.pinHash = state.settings.pinHash;
     next.settings.pinSalt = state.settings.pinSalt;
+    if (raw.machinery && window.CBMachineryData && !window.CBMachineryData.importData(raw.machinery)) {
+      toast(t('restore_fail')); return;
+    }
     state = next;
     ui.projectId = '';
     try { localStorage.removeItem(PREREST_KEY); } catch (e) { /* ignore */ }
@@ -2815,11 +2836,15 @@
           var parsed = JSON.parse(text);
           if (parsed && parsed.cashbookPhotos) { restorePhotos(parsed); return; }
           if (!parsed || !Array.isArray(parsed.books)) throw new Error('not a backup');
+          if (parsed.machinery && window.CBMachineryData && !window.CBMachineryData.validate(parsed.machinery)) throw new Error('invalid machinery backup');
           if (!window.confirm(t('restore_confirm'))) return;
-          try { localStorage.setItem(PREREST_KEY, JSON.stringify(state)); } catch (e2) { /* too big: restore still works */ }
           var next = L.sanitizeState(parsed, { keepPin: false });
           next.settings.pinHash = state.settings.pinHash;
           next.settings.pinSalt = state.settings.pinSalt;
+          // Keep the pre-restore fleet alongside the cash books for a complete rollback.
+          var previous = { cashbook: state, machinery: window.CBMachineryData ? window.CBMachineryData.exportData() : null };
+          try { localStorage.setItem(PREREST_KEY, JSON.stringify(previous)); } catch (e2) { /* restore still works if rollback storage is full */ }
+          if (parsed.machinery && window.CBMachineryData && !window.CBMachineryData.importData(parsed.machinery)) throw new Error('could not restore machinery data');
           state = next;
           ui.projectId = '';
           ui.month = cal().monthKey(L.todayStr());
