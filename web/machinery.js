@@ -102,7 +102,7 @@ function updateRecord(kind,id,v){
   var payload=kind==='payment'?{type:'in',amount:amount,date:v.date,category:'Customer payment',party:(customer(v.customerId)||{}).name||'',note:(v.method||'Cash')+(v.reference?' · '+v.reference:'')+(v.note?' · '+v.note:'')}:{type:'out',amount:amount,date:v.date,category:v.type,party:'',note:(v.note||'')+(Number(v.quantity)>0?' · Quantity: '+v.quantity:'')};
   if(!window.CBMachineBooks||!window.CBMachineBooks.updateCash||!window.CBMachineBooks.updateCash(oldMachine,newMachine,kind,id,payload))return false;
   x.machineId=newMachine.id;x.bookId=newMachine.cashBookId;
-  if(kind==='payment'){var allocatedTrip=v.tripId?byKind('trip',v.tripId):null;if(allocatedTrip&&(allocatedTrip.customerId!==v.customerId||allocatedTrip.machineId!==newMachine.id||amount>tripDue(allocatedTrip)+0.005))return false;x.customerId=v.customerId;x.amount=amount;x.date=v.date;x.method=v.method;x.reference=v.reference;x.note=v.note;x.allocations=allocatedTrip?[{tripId:allocatedTrip.id,amount:amount}]:[];}
+  if(kind==='payment'){var allocatedTrip=v.tripId?byKind('trip',v.tripId):null;if(allocatedTrip){var previouslyAllocated=(x.allocations||[]).reduce(function(n,a){return n+(a.tripId===allocatedTrip.id?(Number(a.amount)||0):0);},0);if(allocatedTrip.customerId!==v.customerId||allocatedTrip.machineId!==newMachine.id||amount>tripDue(allocatedTrip)+previouslyAllocated+0.005)return false;}x.customerId=v.customerId;x.amount=amount;x.date=v.date;x.method=v.method;x.reference=v.reference;x.note=v.note;x.allocations=allocatedTrip?[{tripId:allocatedTrip.id,amount:amount}]:[];}
   else{x.date=v.date;x.type=v.type;x.amount=amount;x.quantity=Number(v.quantity)||0;x.note=v.note;}
   return true;
  }
