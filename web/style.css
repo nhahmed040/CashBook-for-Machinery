@@ -606,3 +606,8 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 4px var(--accent-soft);
   background: var(--surface);
 }
+
+
+/* Respect collapsed panels such as the optional driver registration form. */
+[hidden] { display: none !important; }
+.mach-section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
