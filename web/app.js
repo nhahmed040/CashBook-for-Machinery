@@ -3585,9 +3585,10 @@
       var found = state.books.filter(function (x) { return x.machineId === String(machine.id); })[0];
       if (found) { machine.cashBookId = found.id; return found.id; }
       var id = 'm' + L.newId();
+      found = { id: id, name: String(machine.name || 'Machine').slice(0, 30) + ' Cash Book', machineId: String(machine.id), updated: L.todayStr(), entries: [] };
       state.books.push(found); machine.cashBookId = found.id;
       if (!save()) {
-        state.books = state.books.filter(function (x) { return x.id !== found.id; });
+        state.books = state.books.filter(function (x) { return x.id !== id; });
         machine.cashBookId = '';
         return null;
       }
