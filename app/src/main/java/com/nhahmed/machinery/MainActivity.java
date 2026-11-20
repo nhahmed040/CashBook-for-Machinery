@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.print.PrintAttributes;
 import android.print.PrintManager;
 import android.database.Cursor;
@@ -57,6 +58,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private WebView printView; // kept so the print job's WebView is not garbage-collected
     private ValueCallback<Uri[]> filePathCallback;
+    private long lastDashboardBackPress = 0L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +132,31 @@ public class MainActivity extends Activity {
         });
 
         web.loadUrl("file:///android_asset/index.html");
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (web == null) {
+            super.onBackPressed();
+            return;
+        }
+        web.evaluateJavascript(
+                "(window.__handleAndroidBack ? window.__handleAndroidBack() : false)",
+                value -> {
+                    if ("true".equals(value)) {
+                        lastDashboardBackPress = 0L;
+                        return;
+                    }
+                    long now = SystemClock.elapsedRealtime();
+                    if (now - lastDashboardBackPress <= 2000L) {
+                        lastDashboardBackPress = 0L;
+                        finish();
+                    } else {
+                        lastDashboardBackPress = now;
+                        Toast.makeText(MainActivity.this,
+                                "Press Back again to exit", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private static final int REQ_PICK_CONTACT = 9102;
