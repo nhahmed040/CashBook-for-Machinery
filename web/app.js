@@ -3477,6 +3477,35 @@
       var entry = L.sanitizeEntry({ id: L.newId(), type: data.type === 'out' ? 'out' : 'in', amount: Number(data.amount), date: data.date, category: data.category, note: data.note, party: data.party, mode: data.mode || '', by: data.by || 'Machinery', machineSourceType: String(sourceType || ''), machineSourceId: key });
       if (!entry) return false;
       target.entries.push(entry); save(); renderAll(); return true;
+    },
+    updateCash: function (oldMachine, newMachine, sourceType, sourceId, data) {
+      if (!oldMachine || !newMachine || !sourceId || !data || !(Number(data.amount) > 0) || !data.date) return false;
+      var oldId = this.ensure(oldMachine), newId = this.ensure(newMachine);
+      var oldBook = bookById(oldId), newBook = bookById(newId);
+      if (!oldBook || !newBook) return false;
+      var key = String(sourceType || '') + ':' + String(sourceId);
+      var index = oldBook.entries.findIndex(function (e) { return e.machineSourceId === key; });
+      if (index < 0) return false;
+      var entry = oldBook.entries[index];
+      entry.type = data.type === 'out' ? 'out' : 'in';
+      entry.amount = Number(data.amount);
+      entry.date = data.date;
+      entry.category = data.category || '';
+      entry.note = data.note || '';
+      entry.party = data.party || '';
+      if (oldBook.id !== newBook.id) {
+        if (newBook.entries.some(function (e) { return e.machineSourceId === key; })) return false;
+        oldBook.entries.splice(index, 1);
+        newBook.entries.push(entry);
+      }
+      save(); renderAll(); return true;
+    },
+    rename: function (machine) {
+      if (!machine || !machine.id) return false;
+      var bookId = this.ensure(machine), target = bookById(bookId);
+      if (!target) return false;
+      target.name = String(machine.name || 'Machine').slice(0, 30) + ' Cash Book';
+      save(); renderAll(); return true;
     }
   };
 })();
