@@ -570,3 +570,39 @@ body.view-machinery .fab{display:none}
 
 /* Trip-first machinery management */
 #machineryApp{display:flex;flex-direction:column;gap:12px}.mach-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 2px}.mach-head h2{margin:0;font-size:1.25rem}.mach-head p{margin:3px 0 0;color:var(--muted);font-size:.78rem}.mach-live{font-size:.65rem;font-weight:800;letter-spacing:.06em;padding:5px 8px;border-radius:20px;background:var(--accent-soft);color:var(--accent)}.mach-nav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 7px;scrollbar-width:none}.mach-nav button{white-space:nowrap;border-radius:22px;padding:8px 13px;font-size:.78rem;background:var(--surface);border:1px solid var(--line,var(--border));color:var(--text)}.mach-nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}.mach-panel{background:var(--surface);border:1px solid var(--line,var(--border));border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}.mach-panel h3{margin:0 0 10px;font-size:1rem}.mach-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.mach-kpis article{background:var(--surface);border:1px solid var(--line,var(--border));border-radius:14px;padding:12px;min-width:0}.mach-kpis small{display:block;color:var(--muted);font-size:.75rem}.mach-kpis b{display:block;margin-top:5px;font-size:1.05rem;overflow-wrap:anywhere}.mach-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mach-metrics span{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:.78rem}.mach-metrics strong{color:var(--text);font-size:.95rem;overflow-wrap:anywhere}.mach-note{color:var(--muted);font-size:.78rem;line-height:1.45}.mach-form{display:flex;flex-direction:column;gap:10px}.mach-form label{display:flex;flex-direction:column;gap:5px;font-size:.8rem;font-weight:600}.mach-form input,.mach-form select{width:100%;min-width:0}.mach-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.mach-record{display:flex;flex-direction:column;gap:4px;padding:11px 0;border-bottom:1px solid var(--line,var(--border));font-size:.82rem}.mach-record:last-child{border-bottom:0}.mach-record span{color:var(--muted);overflow-wrap:anywhere}.mach-record strong{color:var(--accent)}.mach-record-top{display:flex;justify-content:space-between;gap:8px}.mach-record-top small{color:var(--muted);white-space:nowrap}@media(max-width:360px){.mach-two{grid-template-columns:1fr}.mach-kpis{gap:6px}.mach-kpis article{padding:9px}}
+
+
+/* Global form-field consistency: use the soft, spacious phone-field treatment */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+select,
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  padding: 15px 14px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  line-height: 1.35;
+}
+input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color: var(--accent); }
+input[type="file"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+}
+textarea { min-height: 110px; resize: vertical; }
+input:focus, select:focus, textarea:focus {
+  outline: 0;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  background: var(--surface);
+}
