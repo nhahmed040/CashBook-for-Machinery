@@ -40,7 +40,15 @@
   function buzz() { try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) { /* ignore */ } }
   var rev = 0;                       // bumps on every local change (sync checks it)
   function saveRaw() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+    try {
+      var serialized = JSON.stringify(state);
+      localStorage.setItem(STORAGE_KEY, serialized);
+      if (localStorage.getItem(STORAGE_KEY) !== serialized) throw new Error('Saved data verification failed');
+      return true;
+    } catch (e) {
+      toast('Could not safely save CashBook data. Phone storage may be full; export a backup and free storage before continuing.');
+      return false;
+    }
   }
   /* each book remembers the day it last changed: a cheap fingerprint of its name and entries is compared on every save */
   var bookFp = {};
@@ -59,8 +67,9 @@
   function save() {
     rev++;
     touchBooks();
-    saveRaw();
-    if (window.__scheduleSync) window.__scheduleSync();
+    var saved = saveRaw();
+    if (saved && window.__scheduleSync) window.__scheduleSync();
+    return saved;
   }
   function canEdit(b) { return !b.sync || b.sync.role !== 'view'; }
 
@@ -2739,12 +2748,14 @@
     return {
       entries: n, projects: state.projects.length, contacts: state.contacts.length,
       machines: m ? m.machines.length : 0, trips: m ? m.trips.length : 0,
-      machineryExpenses: m ? m.expenses.length : 0, machineryPayments: m ? m.payments.length : 0
+      machineryExpenses: m ? m.expenses.length : 0, machineryPayments: m ? m.payments.length : 0,
+      machineryDrivers: m ? m.drivers.length : 0, machineryCustomers: m ? m.customers.length : 0,
+      machineryMaintenance: m ? m.maintenance.length : 0
     };
   }
   function hasData() {
     var c = dataCount();
-    return c.entries + c.projects + c.contacts + c.machines + c.trips + c.machineryExpenses + c.machineryPayments > 0;
+    return c.entries + c.projects + c.contacts + c.machines + c.trips + c.machineryExpenses + c.machineryPayments + c.machineryDrivers + c.machineryCustomers + c.machineryMaintenance > 0;
   }
 
   function buildBackup() {
@@ -2774,7 +2785,9 @@
         setBackupInfo({
           last: Date.now(), entries: c.entries, projects: c.projects, contacts: c.contacts,
           machines: c.machines, trips: c.trips, machineryExpenses: c.machineryExpenses,
-          machineryPayments: c.machineryPayments, photos: r.photos, snooze: 0
+          machineryPayments: c.machineryPayments, machineryDrivers: c.machineryDrivers,
+          machineryCustomers: c.machineryCustomers, machineryMaintenance: c.machineryMaintenance,
+          photos: r.photos, snooze: 0
         });
         renderBackupState();
       }
