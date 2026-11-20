@@ -3088,6 +3088,13 @@
     }
     function syncAll(manual) {
       if (!ready()) { if (manual) toast(t('need_signin')); return Promise.resolve(); }
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        status = 'Offline — changes are saved on this device; sync will resume when connected.';
+        dot('err');
+        renderCloud();
+        if (manual) toast('You are offline. Your records remain saved on this device.');
+        return Promise.resolve();
+      }
       if (busy) { again = true; return Promise.resolve(); }
       busy = true; again = false; dot('busy');
       var changed = false;
@@ -3121,8 +3128,18 @@
       timer = setTimeout(function () { syncAll(false); }, ms == null ? 2500 : ms);
     }
     window.__scheduleSync = function () { schedule(); };
-    // Resume optional sync when connectivity returns; offline edits remain saved locally.
-    window.addEventListener('online', function () { if (ready()) schedule(1000); });
+    // Keep offline work local and avoid repeated network failures; resume optional sync on reconnect.
+    window.addEventListener('offline', function () {
+      clearTimeout(timer);
+      status = 'Offline — changes are saved on this device; sync will resume when connected.';
+      dot('err');
+      renderCloud();
+    });
+    window.addEventListener('online', function () {
+      status = 'Connection restored — syncing…';
+      renderCloud();
+      if (ready()) schedule(1000);
+    });
     window.__syncNow = function () { return syncAll(true); };
 
     /* deleting a synced book also removes (owner) or leaves (member) the online copy, otherwise it would come back */
