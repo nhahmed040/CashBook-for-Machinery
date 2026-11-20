@@ -613,3 +613,5 @@ input:focus, select:focus, textarea:focus {
 .mach-section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 
 .mach-statement{margin:8px 0;padding:9px 11px;border-radius:10px;background:var(--surface-2,#f3f6fa);display:flex;flex-direction:column;gap:4px}.mach-statement small{opacity:.78}
+
+.mach-check{display:flex;align-items:center;gap:10px;min-height:42px}.mach-check input{width:20px;height:20px;min-height:20px;padding:0;flex:0 0 auto}.mach-form select[multiple]{min-height:150px;padding:8px}
