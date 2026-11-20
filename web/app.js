@@ -2747,7 +2747,7 @@
     var m = window.CBMachineryData ? window.CBMachineryData.exportData() : null;
     return {
       entries: n, projects: state.projects.length, contacts: state.contacts.length,
-      machines: m ? m.machines.length : 0, trips: m ? m.trips.length : 0,
+      machines: m ? m.machines.length : 0, operations: m ? m.operations.length : 0, trips: m ? m.trips.length : 0,
       machineryExpenses: m ? m.expenses.length : 0, machineryPayments: m ? m.payments.length : 0,
       machineryDrivers: m ? m.drivers.length : 0, machineryCustomers: m ? m.customers.length : 0,
       machineryMaintenance: m ? m.maintenance.length : 0
@@ -2755,7 +2755,7 @@
   }
   function hasData() {
     var c = dataCount();
-    return c.entries + c.projects + c.contacts + c.machines + c.trips + c.machineryExpenses + c.machineryPayments + c.machineryDrivers + c.machineryCustomers + c.machineryMaintenance > 0;
+    return c.entries + c.projects + c.contacts + c.machines + c.operations + c.trips + c.machineryExpenses + c.machineryPayments + c.machineryDrivers + c.machineryCustomers + c.machineryMaintenance > 0;
   }
 
   function buildBackup() {
@@ -2784,7 +2784,7 @@
         var c = dataCount();
         setBackupInfo({
           last: Date.now(), entries: c.entries, projects: c.projects, contacts: c.contacts,
-          machines: c.machines, trips: c.trips, machineryExpenses: c.machineryExpenses,
+          machines: c.machines, operations: c.operations, trips: c.trips, machineryExpenses: c.machineryExpenses,
           machineryPayments: c.machineryPayments, machineryDrivers: c.machineryDrivers,
           machineryCustomers: c.machineryCustomers, machineryMaintenance: c.machineryMaintenance,
           photos: r.photos, snooze: 0
