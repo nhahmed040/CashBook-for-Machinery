@@ -3585,18 +3585,24 @@
       var found = state.books.filter(function (x) { return x.machineId === String(machine.id); })[0];
       if (found) { machine.cashBookId = found.id; return found.id; }
       var id = 'm' + L.newId();
-      found = { id: id, name: String(machine.name || 'Machine').slice(0, 30) + ' Cash Book', projectId: '', businessId: '', machineId: String(machine.id), updated: L.todayStr(), entries: [] };
       state.books.push(found); machine.cashBookId = found.id;
-      save(); renderAll(); return found.id;
+      if (!save()) {
+        state.books = state.books.filter(function (x) { return x.id !== found.id; });
+        machine.cashBookId = '';
+        return null;
+      }
+      renderAll(); return found.id;
     },
     postCash: function (machine, sourceType, sourceId, data) {
       var bookId = this.ensure(machine), target = bookById(bookId);
-      if (!target || !sourceId || !data || !(Number(data.amount) > 0)) return false;
+      if (!target || !sourceId || !data || !(Number(data.amount) > 0) || !data.date) return false;
       var key = String(sourceType || '') + ':' + String(sourceId);
       if (target.entries.some(function (e) { return e.machineSourceId === key; })) return true;
       var entry = L.sanitizeEntry({ id: L.newId(), type: data.type === 'out' ? 'out' : 'in', amount: Number(data.amount), date: data.date, category: data.category, note: data.note, party: data.party, mode: data.mode || '', by: data.by || 'Machinery', machineSourceType: String(sourceType || ''), machineSourceId: key });
       if (!entry) return false;
-      target.entries.push(entry); save(); renderAll(); return true;
+      target.entries.push(entry);
+      if (!save()) { target.entries.pop(); return false; }
+      renderAll(); return true;
     },
     updateCash: function (oldMachine, newMachine, sourceType, sourceId, data) {
       if (!oldMachine || !newMachine || !sourceId || !data || !(Number(data.amount) > 0) || !data.date) return false;
@@ -3607,25 +3613,31 @@
       var index = oldBook.entries.findIndex(function (e) { return e.machineSourceId === key; });
       if (index < 0) return false;
       var entry = oldBook.entries[index];
+      var previous = Object.assign({}, entry);
+      var moved = oldBook.id !== newBook.id;
+      if (moved && newBook.entries.some(function (e) { return e.machineSourceId === key; })) return false;
       entry.type = data.type === 'out' ? 'out' : 'in';
       entry.amount = Number(data.amount);
       entry.date = data.date;
       entry.category = data.category || '';
       entry.note = data.note || '';
       entry.party = data.party || '';
-      if (oldBook.id !== newBook.id) {
-        if (newBook.entries.some(function (e) { return e.machineSourceId === key; })) return false;
-        oldBook.entries.splice(index, 1);
-        newBook.entries.push(entry);
+      if (moved) { oldBook.entries.splice(index, 1); newBook.entries.push(entry); }
+      if (!save()) {
+        if (moved) { newBook.entries = newBook.entries.filter(function (e) { return e !== entry; }); oldBook.entries.splice(index, 0, entry); }
+        Object.keys(previous).forEach(function (k) { entry[k] = previous[k]; });
+        return false;
       }
-      save(); renderAll(); return true;
+      renderAll(); return true;
     },
     rename: function (machine) {
       if (!machine || !machine.id) return false;
       var bookId = this.ensure(machine), target = bookById(bookId);
       if (!target) return false;
+      var previous = target.name;
       target.name = String(machine.name || 'Machine').slice(0, 30) + ' Cash Book';
-      save(); renderAll(); return true;
+      if (!save()) { target.name = previous; return false; }
+      renderAll(); return true;
     }
   };
 })();
