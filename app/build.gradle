@@ -15,8 +15,8 @@ android {
         applicationId 'com.nhahmed.machinery'
         minSdk 26
         targetSdk 34
-        versionCode 44
-        versionName '2.19.1'
+        versionCode 45
+        versionName '2.19.2'
     }
 
     signingConfigs {
