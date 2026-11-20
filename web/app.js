@@ -2931,7 +2931,12 @@
           state = next;
           ui.projectId = '';
           ui.month = cal().monthKey(L.todayStr());
-          save();
+          if (!save()) {
+            state = previous.cashbook;
+            if (previous.machinery && window.CBMachineryData) window.CBMachineryData.importData(previous.machinery);
+            renderAll();
+            throw new Error('CashBook restore could not be saved; previous data was reinstated');
+          }
           renderAll();
           toast(t('restored'));
           if (parsed.photos && typeof parsed.photos === 'object') putPhotos(parsed).then(function () { renderAll(); });
