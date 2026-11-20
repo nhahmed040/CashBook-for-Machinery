@@ -110,6 +110,21 @@ function updateRecord(kind,id,v){
 
 function formData(f){var o={};new FormData(f).forEach(function(v,k){o[k]=String(v).trim();});return o;}
 document.addEventListener('click',function(e){var edit=e.target.closest('[data-edit-kind]');if(edit){editing={kind:edit.getAttribute('data-edit-kind'),id:edit.getAttribute('data-edit-id')};render();return;}if(e.target.closest('[data-edit-cancel]')){editing=null;render();return;}var b=e.target.closest('[data-mtab]');if(b){editing=null;activeTab=b.getAttribute('data-mtab');render();}});
+// Capture the edit form before other app handlers. This avoids WebView form
+// submission quirks and verifies that the updated machinery state reached storage.
+document.addEventListener('submit',function(e){
+ var f=e.target;
+ if(!f||f.getAttribute('id')!=='editRecordForm')return;
+ e.preventDefault();e.stopImmediatePropagation();
+ try{
+  var v={};new FormData(f).forEach(function(value,key){v[key]=String(value).trim();});
+  if(!updateRecord(v.kind,v.id,v)){alert('Changes were not saved. Please check the required fields and try again.');return;}
+  var serialized=JSON.stringify(state);
+  localStorage.setItem(KEY,serialized);
+  if(localStorage.getItem(KEY)!==serialized)throw new Error('Storage verification failed');
+  editing=null;render();alert('Changes saved successfully.');
+ }catch(err){alert('Save failed. Your existing records have not been intentionally deleted. Please check available phone storage and try again.');}
+},true);
 document.addEventListener('submit',function(e){
 var f=e.target;if(!f||!f.id)return;var v=formData(f);
 if(f.id==='editRecordForm'){e.preventDefault();if(!updateRecord(v.kind,v.id,v)){alert('Could not update this record. Check the selected machine, customer, date and amount. No change was saved.');return;}editing=null;save();render();alert('Changes saved successfully.');return;}
