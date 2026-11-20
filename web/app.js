@@ -519,12 +519,14 @@
 
   /* ---------- generic form dialog ---------- */
   var formStates = [];
+  var formDirty = false;
   function rollbackForm() { formStates.forEach(rollbackPhotos); formStates = []; }
 
   /* opts: { title, fields:[{key,label,type,value,options,required,min,max,step,ph,text}], submitLabel,
              onSubmit(values) -> error string | null, onDelete() } */
   function openForm(opts) {
     rollbackForm();
+    formDirty = false;
     $('formTitle').textContent = opts.title;
     $('formErr').textContent = '';
     $('formSubmit').textContent = opts.submitLabel || t('save');
@@ -598,16 +600,21 @@
       if (err) { $('formErr').textContent = err; return; }
       formStates.forEach(commitPhotos);
       formStates = [];
+      formDirty = false;
       closeModal('formModal');
     };
     $('formDelete').onclick = function () {
-      if (opts.onDelete && opts.onDelete() !== false) { rollbackForm(); closeModal('formModal'); }
+      if (opts.onDelete && opts.onDelete() !== false) { rollbackForm(); formDirty = false; closeModal('formModal'); }
     };
+    Array.prototype.forEach.call(body.querySelectorAll('input,select,textarea'), function (control) {
+      control.addEventListener('input', function () { formDirty = true; });
+      control.addEventListener('change', function () { formDirty = true; });
+    });
     openModal('formModal');
     var first = body.querySelector('input,select');
     if (first && opts.focus !== false) setTimeout(function () { first.focus(); }, 60);
   }
-  $('formCancel').addEventListener('click', function () { rollbackForm(); closeModal('formModal'); });
+  $('formCancel').addEventListener('click', function () { rollbackForm(); formDirty = false; closeModal('formModal'); });
   $('formModal').addEventListener('click', function (ev) { if (ev.target === this) { rollbackForm(); closeModal('formModal'); } });
 
   /* ---------- linking helpers (bill payments / certificate receipts <-> cash entries) ---------- */
@@ -1879,7 +1886,29 @@
 
     var form = $('formModal');
     if (form && form.classList.contains('open')) {
-      $('formCancel').click();
+      if (!formDirty) {
+        $('formCancel').click();
+        return true;
+      }
+      if (!document.querySelector('.backconfirm')) {
+        var prompt = el('div', 'overlay open backconfirm');
+        var panel = el('div', 'modal');
+        panel.appendChild(el('h2', null, 'Unsaved changes'));
+        panel.appendChild(el('p', 'muted', 'Save your changes before leaving?'));
+        panel.appendChild(btn('Save changes', 'block primary', function () {
+          if (prompt.parentNode) prompt.parentNode.removeChild(prompt);
+          $('formSubmit').click();
+        }));
+        panel.appendChild(btn('Discard changes', 'block danger', function () {
+          if (prompt.parentNode) prompt.parentNode.removeChild(prompt);
+          $('formCancel').click();
+        }));
+        panel.appendChild(btn('Continue editing', 'block', function () {
+          if (prompt.parentNode) prompt.parentNode.removeChild(prompt);
+        }));
+        prompt.appendChild(panel);
+        document.body.appendChild(prompt);
+      }
       return true;
     }
     var pin = $('pinModal');
