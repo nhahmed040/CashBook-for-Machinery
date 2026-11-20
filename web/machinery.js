@@ -130,7 +130,7 @@ document.addEventListener('submit',async function(e){
   editing=null;render();alert('Changes saved successfully.');
  }catch(err){alert('Save failed. Your existing records have not been intentionally deleted. Please check available phone storage and try again.');}
 },true);
-document.addEventListener('submit',function(e){
+document.addEventListener('submit',async function(e){
 var f=e.target;if(!f||!f.id)return;var v=formData(f);
 if(f.id==='editRecordForm'){e.preventDefault();if(!updateRecord(v.kind,v.id,v)){alert('Could not update this record. Check the selected machine, customer, date and amount. No change was saved.');return;}editing=null;save();render();alert('Changes saved successfully.');return;}
 if(f.id==='machineForm'){e.preventDefault();if(!v.name)return;var m={id:uid(),name:v.name,type:v.type,plate:v.plate,make:v.make,capacity:v.capacity,ownership:v.ownership,status:v.status,rateMode:v.rateMode,rate:Number(v.rate)||0,created:today()};var bookId=machineBook(m);if(!bookId){alert('Could not create this machine’s dedicated cash book. Machine was not saved.');return;}m.cashBookId=bookId;state.machines.push(m);save();render();}
