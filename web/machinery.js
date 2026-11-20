@@ -215,6 +215,7 @@ render();
         var serialized = JSON.stringify(next);
         // Persist first. Only replace the live state after storage accepts the full payload.
         localStorage.setItem(KEY, serialized);
+        if (localStorage.getItem(KEY) !== serialized) throw new Error('Restore verification failed');
         state = next;
         render();
         return true;
