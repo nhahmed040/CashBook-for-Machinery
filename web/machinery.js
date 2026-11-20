@@ -103,6 +103,7 @@ function updateRecord(kind,id,v){
   else{x.date=v.date;x.type=v.type;x.amount=amount;x.quantity=Number(v.quantity)||0;x.note=v.note;}
   return true;
  }
+
  ['name','phone','licence','licenceNumber','age','idNumber','monthlySalary','dailyIncentive','guarantorName','guarantorPhone','guarantorIdNumber','idPhotoFront','idPhotoBack','licencePhoto','address','taxId','type','plate','make','capacity','ownership','status','rateMode'].forEach(function(k){if(v[k]!=null)x[k]=v[k];});
  if(kind==='machine'){var nd=driver(v.driverId||'');if(nd&&nd.type!==x.type)return false;if(nd&&nd.machineId&&nd.machineId!==x.id)return false;state.drivers.forEach(function(d){if(d.machineId===x.id)d.machineId='';});x.driverId=v.driverId||'';if(nd)nd.machineId=x.id;x.rate=Number(v.rate)||0;if(window.CBMachineBooks&&window.CBMachineBooks.rename)window.CBMachineBooks.rename(x);}
  if(kind==='driver'){var assignedMachine=machine(x.machineId||'');if(assignedMachine&&assignedMachine.type!==v.type)return false;}
