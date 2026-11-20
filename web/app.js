@@ -3630,6 +3630,26 @@
       }
       renderAll(); return true;
     },
+    audit: function () {
+      var entries = [];
+      state.books.forEach(function (b) { (b.entries || []).forEach(function (e) { if (e.machineSourceId) entries.push({ key: String(e.machineSourceId), bookId: b.id }); }); });
+      var expected = [];
+      if (window.CBMachineryData && window.CBMachineryData.exportData) {
+        var fleet = window.CBMachineryData.exportData();
+        (fleet.payments || []).forEach(function (p) { expected.push({ key: 'payment:' + p.id, machineId: p.machineId }); });
+        (fleet.expenses || []).forEach(function (x) { expected.push({ key: 'expense:' + x.id, machineId: x.machineId }); });
+      }
+      var issues = [], seen = {};
+      entries.forEach(function (x) { seen[x.key] = (seen[x.key] || 0) + 1; if (seen[x.key] > 1) issues.push('Duplicate posting: ' + x.key); });
+      expected.forEach(function (x) {
+        var matches = entries.filter(function (e) { return e.key === x.key; });
+        var b = state.books.filter(function (book) { return book.machineId === String(x.machineId); })[0];
+        if (!matches.length) issues.push('Missing posting: ' + x.key);
+        else if (b && matches.some(function (e) { return e.bookId !== b.id; })) issues.push('Wrong machine book: ' + x.key);
+      });
+      entries.forEach(function (x) { if ((x.key.indexOf('payment:') === 0 || x.key.indexOf('expense:') === 0) && !expected.some(function (e) { return e.key === x.key; })) issues.push('Orphan posting: ' + x.key); });
+      return { checked: expected.length, postings: entries.length, issues: issues };
+    },
     rename: function (machine) {
       if (!machine || !machine.id) return false;
       var bookId = this.ensure(machine), target = bookById(bookId);
