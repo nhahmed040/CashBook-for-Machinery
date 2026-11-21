@@ -2673,12 +2673,14 @@
       machines: m ? m.machines.length : 0, operations: m ? m.operations.length : 0, trips: m ? m.trips.length : 0,
       machineryExpenses: m ? m.expenses.length : 0, machineryPayments: m ? m.payments.length : 0,
       machineryDrivers: m ? m.drivers.length : 0, machineryCustomers: m ? m.customers.length : 0,
-      machineryMaintenance: m ? m.maintenance.length : 0
+      machineryMaintenance: m ? m.maintenance.length : 0,
+      machineryDriverLedger: m ? (m.driverLedger || []).length : 0,
+      machineryDailyClosings: m ? (m.dailyClosings || []).length : 0
     };
   }
   function hasData() {
     var c = dataCount();
-    return c.entries + c.projects + c.contacts + c.machines + c.operations + c.trips + c.machineryExpenses + c.machineryPayments + c.machineryDrivers + c.machineryCustomers + c.machineryMaintenance > 0;
+    return c.entries + c.projects + c.contacts + c.machines + c.operations + c.trips + c.machineryExpenses + c.machineryPayments + c.machineryDrivers + c.machineryCustomers + c.machineryMaintenance + c.machineryDriverLedger + c.machineryDailyClosings > 0;
   }
 
   function buildBackup() {
@@ -2710,6 +2712,7 @@
           machines: c.machines, operations: c.operations, trips: c.trips, machineryExpenses: c.machineryExpenses,
           machineryPayments: c.machineryPayments, machineryDrivers: c.machineryDrivers,
           machineryCustomers: c.machineryCustomers, machineryMaintenance: c.machineryMaintenance,
+          machineryDriverLedger: c.machineryDriverLedger, machineryDailyClosings: c.machineryDailyClosings,
           photos: r.photos, snooze: 0
         });
         renderBackupState();
