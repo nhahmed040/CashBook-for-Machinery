@@ -162,9 +162,20 @@ body.view-settings .fab, body.view-reports .fab { display: none; }
 .toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 40; max-width: 90vw; background: #222a38; color: #fff; padding: 10px 16px; border-radius: 20px; font-size: .9rem; opacity: 0; pointer-events: none; transition: opacity .2s; text-align: center; }
 .toast.show { opacity: 1; }
 .toast { width: min(560px, calc(100vw - 28px)); max-width: calc(100vw - 28px); box-sizing: border-box; padding: 14px 18px; border-radius: 18px; line-height: 1.45; font-size: .94rem; font-weight: 600; white-space: normal; overflow-wrap: anywhere; box-shadow: 0 10px 32px rgba(0,0,0,.24); }
-.toast-success { background: #176b48; color: #fff; border: 1px solid rgba(255,255,255,.18); }
-.toast-error { background: #9b2929; color: #fff; border: 1px solid rgba(255,255,255,.2); }
-.toast-info { background: #1b1f3b; color: #fff; }
+/* Notifications follow the app's purple-to-teal brand gradient. Status is
+   communicated with a slim accent edge, not a completely different color. */
+.toast-success, .toast-error, .toast-info {
+  background: var(--grad);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.22);
+  border-left: 5px solid rgba(255,255,255,.9);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(50, 45, 130, .34);
+}
+.toast-success { border-left-color: #62e6bd; }
+.toast-error { border-left-color: #ff9a9a; }
+.toast-info { border-left-color: #a9c9ff; }
+.toastact { color: #fff; background: rgba(255,255,255,.16); border-radius: 999px; padding: 6px 12px; text-decoration: none; }
 .toast.show { opacity: 1; pointer-events: auto; }
 
 /* ---- projects ---- */
