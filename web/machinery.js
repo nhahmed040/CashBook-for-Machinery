@@ -159,7 +159,7 @@ function updateRecord(kind,id,v){
  }
 
  ['name','phone','licence','licenceNumber','age','idNumber','monthlySalary','dailyIncentive','guarantorName','guarantorPhone','guarantorIdNumber','idPhotoFront','idPhotoBack','licencePhoto','address','taxId','type','plate','make','capacity','ownership','status','rateMode'].forEach(function(k){if(v[k]!=null)x[k]=v[k];});
- if(kind==='machine'){var nd=driver(v.driverId||'');if(nd&&nd.type!==x.type)return false;if(nd&&nd.machineId&&nd.machineId!==x.id)return false;state.drivers.forEach(function(d){if(d.machineId===x.id)d.machineId='';});x.driverId=v.driverId||'';if(nd)nd.machineId=x.id;x.rate=Number(v.rate)||0;if(window.CBMachineBooks&&window.CBMachineBooks.rename)window.CBMachineBooks.rename(x);}
+ if(kind==='machine'){var nd=driver(v.driverId||'');if(nd&&nd.type!==x.type)return false;if(nd&&nd.machineId&&nd.machineId!==x.id)return false;var previousDriver=driver(x.driverId||'');if(previousDriver&&previousDriver.id!==(nd&&nd.id)){var held=driverHeldBalance(previousDriver.id,x.id),owed=driverPayable(previousDriver.id),pending=state.driverLedger.filter(function(z){return z.driverId===previousDriver.id&&z.machineId===x.id&&z.status==='pending';}).length;var warning='Driver transfer review for '+previousDriver.name+'\\nCash held on this machine: '+money(held)+'\\nCompany owes driver: '+money(owed)+'\\nPending expense reviews: '+pending+'\\n\\nTransfer anyway? Historical transactions remain linked to this machine.';if(!confirm(warning))return false;previousDriver.assignmentHistory=previousDriver.assignmentHistory||[];previousDriver.assignmentHistory.push({machineId:x.id,machineName:x.name,from:previousDriver.assignedFrom||previousDriver.created||today(),to:today()});previousDriver.machineId='';}state.drivers.forEach(function(d){if(d.machineId===x.id&&d.id!==(nd&&nd.id))d.machineId='';});x.driverId=v.driverId||'';if(nd){nd.machineId=x.id;nd.assignmentHistory=nd.assignmentHistory||[];nd.assignmentHistory.push({machineId:x.id,machineName:x.name,from:today(),to:null});}x.rate=Number(v.rate)||0;if(window.CBMachineBooks&&window.CBMachineBooks.rename)window.CBMachineBooks.rename(x);}
  if(kind==='driver'){var assignedMachine=machine(x.machineId||'');if(assignedMachine&&assignedMachine.type!==v.type)return false;}
  if(kind==='customer'){state.trips.forEach(function(t){if(t.customerId===x.id)t.customerName=x.name;});for(var i=0;i<state.payments.length;i++){var p=state.payments[i],pm=machine(p.machineId);if(pm&&p.customerId===x.id&&window.CBMachineBooks&&window.CBMachineBooks.updateCash){var ok=window.CBMachineBooks.updateCash(pm,pm,'payment',p.id,{type:'in',amount:p.amount,date:p.date,category:'Customer payment',party:x.name,note:(p.method||'Cash')+(p.reference?' · '+p.reference:'')+(p.note?' · '+p.note:'')});if(!ok)return false;}}}
  x.updated=new Date().toISOString();return true;
@@ -235,6 +235,8 @@ render();
         operations: state.operations,
         expenses: state.expenses,
         maintenance: state.maintenance,
+        driverLedger: state.driverLedger,
+        dailyClosings: state.dailyClosings,
         auditLog: state.auditLog,
         trips: state.trips,
         customers: state.customers,
@@ -244,13 +246,13 @@ render();
     },
     validate: function (raw) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
-      var keys = ['machines','operations','expenses','maintenance','auditLog','trips','customers','drivers','payments'];
+      var keys = ['machines','operations','expenses','maintenance','driverLedger','dailyClosings','auditLog','trips','customers','drivers','payments'];
       return keys.every(function (key) { return raw[key] == null || Array.isArray(raw[key]); });
     },
     importData: function (raw) {
       if (!this.validate(raw)) return false;
       var next = {};
-      ['machines','operations','expenses','maintenance','auditLog','trips','customers','drivers','payments'].forEach(function (key) {
+      ['machines','operations','expenses','maintenance','driverLedger','dailyClosings','auditLog','trips','customers','drivers','payments'].forEach(function (key) {
         next[key] = Array.isArray(raw[key]) ? raw[key] : [];
       });
       try {
