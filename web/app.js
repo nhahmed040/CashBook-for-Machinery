@@ -1883,7 +1883,6 @@
     renderBookList();
     applyEntriesScreen();
     renderEntries();
-    renderContacts();
     renderReports();
     renderSettings();
     renderBiz();
@@ -1891,14 +1890,14 @@
     if (window.__renderCloud) window.__renderCloud();
   }
 
-  var VIEWS = ['entries', 'contacts', 'machinery', 'reports', 'settings'];
+  var VIEWS = ['entries', 'machinery', 'reports', 'settings'];
   function showView(name) {
     ui.view = name;
     VIEWS.forEach(function (v) { $('view-' + v).hidden = v !== name; });
     Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) {
       b.classList.toggle('active', b.getAttribute('data-view') === name);
     });
-    document.body.classList.remove('view-entries', 'view-contacts', 'view-machinery', 'view-reports', 'view-settings');
+    document.body.classList.remove('view-entries', 'view-machinery', 'view-reports', 'view-settings');
     document.body.classList.add('view-' + name);
     applyEntriesScreen();
     window.scrollTo(0, 0);
@@ -2025,6 +2024,7 @@
     $('note').value = e ? e.note : '';
     $('deleteEntry').hidden = !e;
     fillContactSel(e ? e.contactId : 0);
+    updateContactPickerLabel(e && e.contactId ? byId(state.contacts, e.contactId) : null);
     var ms = $('modeSel');
     ms.textContent = '';
     ms.appendChild(option('', t('mode_none')));
@@ -2192,9 +2192,8 @@
     renderEntries();
   });
 
-  /* ---------- contacts ---------- */
+  /* ---------- inline Android contact picker ---------- */
   function myName() { try { return window.__myName ? window.__myName() : ''; } catch (e) { return ''; } }
-
   function fillContactSel(current) {
     var sel = $('contactSel');
     sel.textContent = '';
@@ -2202,150 +2201,57 @@
     state.contacts.slice().sort(function (a, c) { return a.name.localeCompare(c.name); }).forEach(function (c) {
       sel.appendChild(option(String(c.id), c.name + (c.phone ? ' · ' + c.phone : '')));
     });
-    if (hasPhoneBook) sel.appendChild(option('__phone', t('phonebook_opt')));
-    sel.appendChild(option('__new', t('new_contact_opt')));
     sel.value = current && byId(state.contacts, current) ? String(current) : '';
     sel._prev = sel.value;
   }
-
-  /* ---- phone book (Android contact picker; there is none in a plain browser) ---- */
   var hasPhoneBook = !!(window.AndroidBridge && typeof window.AndroidBridge.pickContact === 'function');
   var phonePick = null;
   function digits(v) { return String(v || '').replace(/\D/g, ''); }
-  function pickFromPhone(done) { phonePick = done; window.AndroidBridge.pickContact(); }
+  function pickFromPhone(done) {
+    if (!hasPhoneBook) { toast('Phone contacts are available in the installed Android app.'); return; }
+    phonePick = done;
+    window.AndroidBridge.pickContact();
+  }
+  function updateContactPickerLabel(c) {
+    var label = $('selectedContactName');
+    if (label) label.textContent = c ? (c.name + (c.phone ? ' · ' + c.phone : '')) : 'No contact selected';
+  }
   window.__onPhoneContact = function (name, phone) {
     var cb = phonePick; phonePick = null;
     if (!cb || !name) return;
     var d = digits(phone), found = null;
-    if (d.length >= 7) state.contacts.forEach(function (c) { if (!found && digits(c.phone).slice(-9) === d.slice(-9)) found = c; });
+    if (d.length >= 7) state.contacts.forEach(function (c) {
+      var existing = digits(c.phone);
+      if (!found && existing.length >= 7 && existing.slice(-9) === d.slice(-9)) found = c;
+    });
     if (!found) {
       found = L.sanitizeContact({ id: L.newId(), name: name, phone: phone, kind: 'other' });
       if (!found) return;
       state.contacts.push(found);
-      save(); renderAll();
+      save();
     }
     cb(found);
   };
-
   $('contactSel').addEventListener('change', function () {
-    var sel = this;
-    if (sel.value === '__phone') {
-      sel.value = sel._prev || '';
-      pickFromPhone(function (c) { fillContactSel(c.id); applyContactToParty(c); });
-      return;
-    }
-    if (sel.value === '__new') {
-      sel.value = sel._prev || '';
-      editContact(null, function (c) { fillContactSel(c.id); applyContactToParty(c); });
-      return;
-    }
-    sel._prev = sel.value;
-    var c = byId(state.contacts, Number(sel.value));
+    var c = byId(state.contacts, Number(this.value));
+    updateContactPickerLabel(c);
     if (c) applyContactToParty(c);
   });
   function applyContactToParty(c) { if (c && !$('entryProject').hidden) $('party').value = c.name; }
-
-  function kindOptions(withAll) {
-    var o = withAll ? [option('all', t('all_kinds'))] : [];
-    L.KINDS.forEach(function (k) { o.push(option(k, t('kind_' + k))); });
-    return o;
-  }
-
-  function editContact(contact, done) {
-    var isNew = !contact;
-    var c = contact || { name: '', phone: '', email: '', address: '', kind: 'customer', note: '' };
-    openForm({
-      title: isNew ? t('add_contact') : t('edit_contact'),
-      fields: [
-        { key: 'name', label: t('contact_name'), type: 'text', value: c.name, required: true },
-        { key: 'kind', label: t('contact_kind'), type: 'select', options: L.KINDS.map(function (k) { return { value: k, label: t('kind_' + k) }; }), value: c.kind },
-        { key: 'phone', label: t('contact_phone'), type: 'text', value: c.phone, max: 30 },
-        { key: 'email', label: t('contact_email'), type: 'text', value: c.email },
-        { key: 'address', label: t('contact_address'), type: 'text', value: c.address, max: 80 },
-        { key: 'note', label: t('contact_note'), type: 'text', value: c.note, max: 80 }
-      ],
-      onSubmit: function (v) {
-        var nc = L.sanitizeContact({ id: contact ? contact.id : L.newId(), name: v.name, kind: v.kind, phone: v.phone, email: v.email, address: v.address, note: v.note });
-        if (!nc) return t('required');
-        if (isNew) state.contacts.push(nc); else Object.keys(nc).forEach(function (k) { contact[k] = nc[k]; });
-        var saved = isNew ? nc : contact;
-        // entries keep the contact's name in their payee text so searches and exports match
-        if (!isNew) state.books.forEach(function (b) { b.entries.forEach(function (e) { if (e.contactId === saved.id) e.party = saved.name; }); });
-        save(); renderAll();
-        if (done) done(saved);
-        return null;
-      },
-      onDelete: isNew ? null : function () {
-        if (!window.confirm(t('confirm_delete_contact'))) return false;
-        trashPut('contact', contact.name, contact, {});
-        state.books.forEach(function (b) { b.entries.forEach(function (e) { if (e.contactId === contact.id) e.contactId = 0; }); });
-        state.contacts = state.contacts.filter(function (x) { return x.id !== contact.id; });
-        if (ui.contactId === contact.id) ui.contactId = 0;
-        save(); renderAll(); undoToast();
-        return true;
-      }
+  $('pickEntryContact').hidden = !hasPhoneBook;
+  $('pickEntryContact').addEventListener('click', function () {
+    pickFromPhone(function (c) {
+      fillContactSel(c.id); updateContactPickerLabel(c); applyContactToParty(c);
     });
-  }
-
-  function renderContacts() {
-    var sel = $('ckind');
-    var keep = ui.ckind;
-    sel.textContent = '';
-    kindOptions(true).forEach(function (o) { sel.appendChild(o); });
-    sel.value = keep;
-    var bal = L.contactBalances(state);
-    var q = ui.cq.trim().toLowerCase();
-    var list = state.contacts.filter(function (c) {
-      if (ui.ckind !== 'all' && c.kind !== ui.ckind) return false;
-      return !q || (c.name + ' ' + c.phone + ' ' + c.email + ' ' + c.address).toLowerCase().indexOf(q) >= 0;
-    }).sort(function (a, c) { return a.name.localeCompare(c.name); });
-    var ul = $('contactList');
-    ul.textContent = '';
-    var tin = 0, tout = 0;
-    list.forEach(function (c) {
-      var b = bal[c.id];
-      tin += b.cashIn; tout += b.cashOut;
-      var li = el('li', 'item contact');
-      li.tabIndex = 0;
-      li.setAttribute('role', 'button');
-      li.appendChild(el('span', 'avatar', c.name.charAt(0).toUpperCase()));
-      var meta = el('div', 'meta');
-      meta.appendChild(el('div', 'title', c.name));
-      meta.appendChild(el('div', 'detail', [t('kind_' + c.kind), c.phone, b.count ? t('entries_n', { n: b.count }) : ''].filter(Boolean).join(' · ')));
-      if (b.count) meta.appendChild(el('div', 'detail', t('received_total') + ' ' + money(b.cashIn) + ' · ' + t('paid_total') + ' ' + money(b.cashOut)));
-      li.appendChild(meta);
-      var side = el('div', 'cside');
-      if (b.count) side.appendChild(el('span', 'amt ' + (b.net >= 0 ? 'in' : 'out'), (b.net >= 0 ? '+' : '−') + money(Math.abs(b.net))));
-      var acts = el('div', 'cacts');
-      if (c.phone) { var a1 = el('a', null, '📞'); a1.href = 'tel:' + c.phone.replace(/[^0-9+]/g, ''); a1.addEventListener('click', function (ev) { ev.stopPropagation(); }); acts.appendChild(a1); }
-      if (c.email) { var a2 = el('a', null, '✉️'); a2.href = 'mailto:' + c.email; a2.addEventListener('click', function (ev) { ev.stopPropagation(); }); acts.appendChild(a2); }
-      if (b.count) {
-        var a3 = el('a', null, '🔎');
-        a3.href = '#';
-        a3.addEventListener('click', function (ev) {
-          ev.preventDefault(); ev.stopPropagation();
-          ui.contactId = c.id; ui.q = ''; $('q').value = '';
-          showView('entries'); renderEntries();
-        });
-        acts.appendChild(a3);
-      }
-      side.appendChild(acts);
-      li.appendChild(side);
-      var open = function () { editContact(c); };
-      li.addEventListener('click', open);
-      li.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); open(); } });
-      ul.appendChild(li);
+  });
+  $('clearEntryContact').addEventListener('click', function () {
+    fillContactSel(0); updateContactPickerLabel(null);
+  });
+  $('pickPartyContact').hidden = !hasPhoneBook;
+  $('pickPartyContact').addEventListener('click', function () {
+    pickFromPhone(function (c) {
+      fillContactSel(c.id); updateContactPickerLabel(c); $('party').value = c.name;
     });
-    $('contactEmpty').hidden = list.length > 0;
-    $('contactEmpty').textContent = state.contacts.length ? t('no_match') : t('no_contacts');
-    $('contactTotals').textContent = list.length ? t('contacts_summary', { n: list.length, i: money(tin), o: money(tout) }) : '';
-  }
-  $('cq').addEventListener('input', function () { ui.cq = this.value; renderContacts(); });
-  $('ckind').addEventListener('change', function () { ui.ckind = this.value; renderContacts(); });
-  $('addContact').addEventListener('click', function () { editContact(null); });
-  $('pickContact').hidden = !hasPhoneBook;
-  $('pickContact').addEventListener('click', function () {
-    pickFromPhone(function (c) { toast(c.name); editContact(c); });
   });
 
   /* ---------- businesses and staff ---------- */
@@ -2517,7 +2423,7 @@
       if (v === 'entries' && ui.view === 'entries') ui.bookOpen = false;   // tapping Entries again goes back to the list of books
       showView(v);
       if (v === 'reports') renderReports();
-      if (v === 'contacts') renderContacts();
+
     });
   });
 
