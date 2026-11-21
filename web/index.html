@@ -101,21 +101,6 @@
       </div>
     </section>
 
-    <!-- CONTACTS -->
-    <section id="view-contacts" class="view" hidden>
-      <div class="panel">
-        <input type="search" id="cq" data-i18n-ph="search_contacts" placeholder="Search name or phone">
-        <div class="row">
-          <select id="ckind" aria-label="Type"></select>
-          <button type="button" id="addContact" class="primary" data-i18n="add_contact">Add contact</button>
-        </div>
-        <button type="button" id="pickContact" class="block" hidden data-i18n="from_phonebook">📱 From phone book</button>
-      </div>
-      <p id="contactTotals" class="muted small"></p>
-      <ul id="contactList" class="list"></ul>
-      <p id="contactEmpty" class="empty" data-i18n="no_contacts">No contacts yet.</p>
-    </section>
-
     <!-- REPORTS -->
     <section id="view-reports" class="view" hidden>
       <div class="monthnav">
@@ -218,7 +203,7 @@
 
   <nav class="tabs">
     <button type="button" data-view="entries" class="active"><span>📒</span><b data-i18n="entries">Entries</b></button>
-    <button type="button" data-view="contacts"><span>👥</span><b data-i18n="contacts">Contacts</b></button>
+
     <button type="button" data-view="machinery"><span>🚜</span><b>Machinery</b></button>
     <button type="button" data-view="reports"><span>📊</span><b data-i18n="reports">Reports</b></button>
     <button type="button" data-view="settings"><span>⚙️</span><b data-i18n="settings">Settings</b></button>
@@ -236,7 +221,12 @@
       <input type="date" id="date" required>
       <input type="text" id="category" list="catList" data-i18n-ph="category" placeholder="Category" maxlength="40">
       <datalist id="catList"></datalist>
-      <select id="contactSel" aria-label="Contact"></select>
+      <select id="contactSel" aria-label="Selected contact" hidden></select>
+      <div class="contact-picker">
+        <button type="button" id="pickEntryContact" class="contact-pick-btn" data-i18n="from_phonebook">📱 Choose from phone</button>
+        <span id="selectedContactName" class="contact-picked-label">No contact selected</span>
+        <button type="button" id="clearEntryContact" class="contact-clear-btn" aria-label="Clear selected contact">Clear</button>
+      </div>
       <div class="row">
         <select id="modeSel" aria-label="Payment mode"></select>
         <input type="text" id="by" list="byList" data-i18n-ph="member" placeholder="Member" maxlength="40">
@@ -246,7 +236,10 @@
       <div id="entryPhotos"></div>
       <div id="entryProject" class="stack" hidden>
         <label class="field"><span data-i18n="cost_code">Cost code</span><select id="codeSel"></select></label>
-        <input type="text" id="party" list="partyList" data-i18n-ph="payee" placeholder="Payee / supplier" maxlength="60">
+        <div class="contact-party-row">
+          <input type="text" id="party" list="partyList" data-i18n-ph="payee" placeholder="Payee / supplier" maxlength="60">
+          <button type="button" id="pickPartyContact" class="contact-pick-btn" data-i18n="from_phonebook">📱 Pick</button>
+        </div>
         <datalist id="partyList"></datalist>
         <label class="field"><span id="linkLabel"></span><select id="linkSel"></select></label>
       </div>
