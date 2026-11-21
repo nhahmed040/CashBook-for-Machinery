@@ -233,9 +233,12 @@
 
   /* ---------- small helpers ---------- */
   var toastTimer = null;
-  function toast(msg, action) {
+  function toast(msg, action, kind) {
     var e = $('toast');
-    e.textContent = msg;
+    e.textContent = '';
+    e.classList.remove('toast-success', 'toast-error', 'toast-info');
+    e.classList.add('toast-' + (kind || 'info'));
+    e.appendChild(document.createTextNode(String(msg == null ? '' : msg)));
     e.classList.toggle('hasact', !!action);
     if (action) {
       var b = document.createElement('button');
@@ -245,10 +248,23 @@
       b.addEventListener('click', function () { e.classList.remove('show'); clearTimeout(toastTimer); action.run(); });
       e.appendChild(b);
     }
+    e.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+    e.setAttribute('aria-live', kind === 'error' ? 'assertive' : 'polite');
     e.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { e.classList.remove('show'); }, action ? 7000 : 2600);
+    toastTimer = setTimeout(function () { e.classList.remove('show'); }, action ? 7000 : (kind === 'error' ? 6000 : 4200));
   }
+
+  /* Route every legacy JavaScript alert through the app's accessible notification UI.
+     This also covers the Machinery module, which loads immediately after this file. */
+  window.alert = function (message) {
+    var msg = String(message == null ? '' : message);
+    var kind = /unable|could not|cannot|failed|error|not saved|invalid|must match|already been|already exists|phone storage|no .* available/i.test(msg)
+      ? 'error'
+      : /saved|recorded|restored|up to date|completed|success|exported|downloaded|synced|created|updated/i.test(msg)
+        ? 'success' : 'info';
+    toast(msg, null, kind);
+  };
 
   function openModal(id) { $(id).classList.add('open'); }
   function closeModal(id) { $(id).classList.remove('open'); }
