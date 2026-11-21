@@ -3506,9 +3506,9 @@
     ensure: function (machine) {
       if (!machine || !machine.id) return null;
       var found = state.books.filter(function (x) { return x.machineId === String(machine.id); })[0];
-      if (found) { machine.cashBookId = found.id; return found.id; }
+      if (found) { machine.cashBookId = found.id; var wantedName = (String(machine.name || 'Machine').trim() + (String(machine.plate || '').trim() ? ' – ' + String(machine.plate).trim() : '')).slice(0, 60); if (found.name !== wantedName) { var previousName = found.name; found.name = wantedName; if (!save()) { found.name = previousName; return null; } renderAll(); } return found.id; }
       var id = 'm' + L.newId();
-      found = { id: id, name: String(machine.name || 'Machine').slice(0, 30) + ' Cash Book', machineId: String(machine.id), updated: L.todayStr(), entries: [] };
+      found = { id: id, name: (String(machine.name || 'Machine').trim() + (String(machine.plate || '').trim() ? ' – ' + String(machine.plate).trim() : '')).slice(0, 60), machineId: String(machine.id), updated: L.todayStr(), entries: [] };
       state.books.push(found); machine.cashBookId = found.id;
       if (!save()) {
         state.books = state.books.filter(function (x) { return x.id !== id; });
@@ -3561,7 +3561,7 @@
       if (window.CBMachineryData && window.CBMachineryData.exportData) {
         var fleet = window.CBMachineryData.exportData();
         (fleet.payments || []).forEach(function (p) { expected.push({ key: 'payment:' + p.id, machineId: p.machineId }); });
-        (fleet.expenses || []).forEach(function (x) { expected.push({ key: 'expense:' + x.id, machineId: x.machineId }); });
+        (fleet.expenses || []).forEach(function (x) { if (x.cashPosted !== false) expected.push({ key: 'expense:' + x.id, machineId: x.machineId }); });
       }
       var issues = [], seen = {};
       entries.forEach(function (x) { seen[x.key] = (seen[x.key] || 0) + 1; if (seen[x.key] > 1) issues.push('Duplicate posting: ' + x.key); });
@@ -3579,7 +3579,7 @@
       var bookId = this.ensure(machine), target = bookById(bookId);
       if (!target) return false;
       var previous = target.name;
-      target.name = String(machine.name || 'Machine').slice(0, 30) + ' Cash Book';
+      target.name = target.name = (String(machine.name || 'Machine').trim() + (String(machine.plate || '').trim() ? ' – ' + String(machine.plate).trim() : '')).slice(0, 60);
       if (!save()) { target.name = previous; return false; }
       renderAll(); return true;
     }
