@@ -2212,6 +2212,7 @@
     phonePick = done;
     window.AndroidBridge.pickContact();
   }
+  window.__pickPhoneContact = pickFromPhone;
   function updateContactPickerLabel(c) {
     var label = $('selectedContactName');
     if (label) label.textContent = c ? (c.name + (c.phone ? ' · ' + c.phone : '')) : 'No contact selected';
