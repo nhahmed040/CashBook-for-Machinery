@@ -688,3 +688,18 @@ input:focus, select:focus, textarea:focus {
 .mach-machine-balance strong{font-size:.95rem}
 .mach-machine-card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;color:var(--muted);font-size:.74rem}
 @media(max-width:380px){.mach-machine-info{grid-template-columns:1fr}.mach-machine-card-head{flex-wrap:wrap}}
+
+/* Machine detail view */
+.mach-detail-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.mach-detail-kpis>div{display:grid;gap:4px;padding:11px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft,var(--surface));min-width:0}
+.mach-detail-kpis small,.mach-detail-pairs span,.mach-detail-row small{font-size:.75rem;color:var(--muted)}
+.mach-detail-kpis b{font-size:.9rem;overflow-wrap:anywhere}
+.mach-detail-section{padding:12px 0;border-top:1px solid var(--border)}
+.mach-detail-section h4{margin:0 0 8px;font-size:.9rem}
+.mach-detail-pairs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px 12px;font-size:.82rem}
+.mach-detail-pairs b{overflow-wrap:anywhere;text-align:right}
+.mach-detail-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:.8rem}
+.mach-detail-row span{overflow-wrap:anywhere}
+.mach-detail-row small{grid-column:1/-1;overflow-wrap:anywhere}
+.mach-cash-in{color:#16834a}.mach-cash-out{color:#b45309}
+@media(max-width:360px){.mach-detail-pairs{grid-template-columns:1fr 1fr}}
