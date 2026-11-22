@@ -3590,17 +3590,17 @@
     },
     audit: function () {
       var entries = [];
-      state.books.forEach(function (b) { (b.entries || []).forEach(function (e) { if (e.machineSourceId) entries.push({ key: String(e.machineSourceId), bookId: b.id }); }); });
+      state.books.forEach(function (b) { (b.entries || []).forEach(function (e) { if (e.machineSourceId) entries.push({ key: String(e.machineSourceId), bookId: b.id, entry: e }); }); });
       var expected = [];
       if (window.CBMachineryData && window.CBMachineryData.exportData) {
         var fleet = window.CBMachineryData.exportData();
-        (fleet.payments || []).forEach(function (p) { expected.push({ key: 'payment:' + p.id, machineId: p.machineId }); });
-        (fleet.expenses || []).forEach(function (x) { if (x.cashPosted !== false) expected.push({ key: 'expense:' + x.id, machineId: x.machineId }); });
+        (fleet.payments || []).forEach(function (p) { expected.push({ key: 'payment:' + p.id, machineId: p.machineId, type: 'in', amount: Number(p.amount) || 0, date: p.date }); });
+        (fleet.expenses || []).forEach(function (x) { if (x.cashPosted !== false) expected.push({ key: 'expense:' + x.id, machineId: x.machineId, type: 'out', amount: Number(x.amount) || 0, date: x.date }); });
         // Driver advances, returned advances and reimbursements are direct
         // machine-CashBook postings under the driver transaction source key.
         (fleet.driverLedger || []).forEach(function (tx) {
           if (['advance', 'advance-return', 'reimbursement'].indexOf(tx.type) >= 0) {
-            expected.push({ key: 'driver:' + tx.id, machineId: tx.machineId });
+            expected.push({ key: 'driver:' + tx.id, machineId: tx.machineId, type: tx.type === 'advance-return' ? 'in' : 'out', amount: Number(tx.amount) || 0, date: tx.date });
           }
         });
       }
@@ -3611,7 +3611,15 @@
         var b = state.books.filter(function (book) { return book.machineId === String(x.machineId); })[0];
         if (!matches.length) issues.push('Missing posting: ' + x.key);
         if (!b) issues.push('Missing machine CashBook for source: ' + x.key);
-        else if (matches.some(function (e) { return e.bookId !== b.id; })) issues.push('Wrong machine book: ' + x.key);
+        else {
+          if (matches.some(function (e) { return e.bookId !== b.id; })) issues.push('Wrong machine book: ' + x.key);
+          var posted = matches.filter(function (e) { return e.bookId === b.id; })[0];
+          if (posted) {
+            if (posted.entry.type !== x.type) issues.push('Wrong cash direction: ' + x.key);
+            if (Math.abs((Number(posted.entry.amount) || 0) - x.amount) > 0.005) issues.push('Cash amount mismatch: ' + x.key);
+            if (String(posted.entry.date || '') !== String(x.date || '')) issues.push('Cash date mismatch: ' + x.key);
+          }
+        }
       });
       entries.forEach(function (x) {
         if ((x.key.indexOf('payment:') === 0 || x.key.indexOf('expense:') === 0 || x.key.indexOf('driver:') === 0) && !expected.some(function (e) { return e.key === x.key; })) issues.push('Orphan posting: ' + x.key);
