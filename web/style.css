@@ -669,3 +669,22 @@ input:focus, select:focus, textarea:focus {
 .mach-driver-account{padding:13px;border:1px solid var(--border);border-radius:14px;margin:9px 0;background:var(--surface)}
 .mach-driver-account .mach-metrics{margin:10px 0}
 .mach-driver-account .mach-metrics span{padding:8px;border-radius:10px;background:var(--surface-soft,var(--surface))}
+
+/* Machinery register: compact mobile-first fleet cards */
+.mach-machine-register-card{padding:14px;margin:10px 0;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow-sm,0 2px 8px rgba(20,40,70,.05))}
+.mach-machine-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.mach-machine-card-head>div{display:grid;gap:4px;min-width:0}
+.mach-machine-card-head b{font-size:1rem;line-height:1.25;overflow-wrap:anywhere}
+.mach-machine-card-head span,.mach-machine-meta,.mach-machine-info small,.mach-machine-stats small{color:var(--muted);font-size:.76rem}
+.mach-machine-status{flex:0 0 auto;padding:5px 9px;border-radius:999px;background:var(--surface-soft,var(--surface));font-size:.68rem;font-style:normal;font-weight:750}
+.mach-machine-meta{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:8px}
+.mach-machine-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.mach-machine-info>div{display:grid;gap:4px;min-width:0;padding:9px 10px;border-radius:11px;background:var(--surface-soft,var(--surface))}
+.mach-machine-info strong{font-size:.84rem;overflow-wrap:anywhere}
+.mach-machine-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}
+.mach-machine-stats>div{display:grid;gap:3px;min-width:0;padding:9px;border:1px solid var(--border);border-radius:10px}
+.mach-machine-stats b{font-size:.84rem;overflow-wrap:anywhere}
+.mach-machine-balance{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 2px 4px;margin-top:7px;border-top:1px solid var(--border);font-size:.8rem}
+.mach-machine-balance strong{font-size:.95rem}
+.mach-machine-card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;color:var(--muted);font-size:.74rem}
+@media(max-width:380px){.mach-machine-info{grid-template-columns:1fr}.mach-machine-card-head{flex-wrap:wrap}}
