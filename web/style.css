@@ -639,3 +639,11 @@ input:focus, select:focus, textarea:focus {
 .contact-party-row { display:flex; align-items:stretch; gap:7px; min-width:0; }
 .contact-party-row input { flex:1 1 auto; min-width:0; }
 @media(max-width:380px) { .contact-party-row { flex-direction:column; } .contact-party-row .contact-pick-btn { align-self:flex-start; } }
+
+/* Organized fleet navigation */
+.mach-groups{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:5px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm)}
+.mach-groups button{min-width:0;padding:9px 3px;border:0;border-radius:11px;background:transparent;color:var(--muted);font-size:.72rem;font-weight:700;white-space:nowrap}
+.mach-groups button.on{background:var(--accent);color:var(--on-accent)}
+.mach-nav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 7px;scrollbar-width:none}
+.mach-nav button{flex:0 0 auto}
+@media(max-width:360px){.mach-groups{gap:3px}.mach-groups button{font-size:.65rem;padding:8px 1px}}
