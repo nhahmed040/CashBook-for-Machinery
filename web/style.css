@@ -763,3 +763,9 @@ input:focus, select:focus, textarea:focus {
 /* Trip and machine CashBook quick actions */
 .mach-record [data-trip-record-payment]{margin:5px 6px 0 0}
 .mach-machine-detail .mach-detail-pairs{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}
+
+/* Settings: clearly grouped owner-controlled fleet rules */
+.settings-fleet-rules{border-left:4px solid var(--accent)}
+.settings-fleet-rules h2{margin:0 0 8px}
+.settings-fleet-rules ul{padding-left:20px;margin:10px 0;display:grid;gap:8px}
+.settings-fleet-rules li{font-size:.82rem;line-height:1.45;color:var(--text)}
