@@ -754,3 +754,8 @@ input:focus, select:focus, textarea:focus {
 .mach-customer-payment-actions button{flex:1 1 150px;min-height:42px}
 #paymentTripHelp{padding:9px 11px;border-radius:10px;background:var(--accent-soft);margin:0}
 #paymentForm [name="tripIds"]{min-height:112px}
+
+/* Search and filtering controls for fleet operations, maintenance and audit */
+.mach-audit-search{display:flex;flex-direction:column;gap:5px;font-size:.8rem;font-weight:600;margin:10px 0}
+.mach-audit-search input{width:100%;min-width:0}
+.mach-fuel-record[hidden],.mach-maintenance-record[hidden],.mach-audit-record[hidden]{display:none!important}
