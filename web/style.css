@@ -647,3 +647,13 @@ input:focus, select:focus, textarea:focus {
 .mach-nav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 7px;scrollbar-width:none}
 .mach-nav button{flex:0 0 auto}
 @media(max-width:360px){.mach-groups{gap:3px}.mach-groups button{font-size:.65rem;padding:8px 1px}}
+
+/* Dashboard owner action centre */
+.mach-owner-panel{border-color:var(--border-strong,var(--border))}
+.mach-action-count{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 9px;border-radius:12px;background:var(--accent-soft,#e8f1ff);color:var(--accent,var(--primary));font-size:1rem}
+.mach-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mach-action-grid button{display:flex;align-items:center;gap:10px;text-align:left;min-height:58px;padding:10px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text)}
+.mach-action-grid button b{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:10px;background:var(--surface-soft,var(--surface));font-size:1.05rem}
+.mach-action-grid button span{font-size:.78rem;font-weight:650;line-height:1.25}
+.mach-machine-card{padding:12px;border-radius:13px;background:var(--surface-soft,var(--surface));margin:8px 0}
+@media(min-width:600px){.mach-action-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
