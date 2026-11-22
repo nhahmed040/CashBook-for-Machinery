@@ -3582,6 +3582,13 @@
         var fleet = window.CBMachineryData.exportData();
         (fleet.payments || []).forEach(function (p) { expected.push({ key: 'payment:' + p.id, machineId: p.machineId }); });
         (fleet.expenses || []).forEach(function (x) { if (x.cashPosted !== false) expected.push({ key: 'expense:' + x.id, machineId: x.machineId }); });
+        // Driver advances, returned advances and reimbursements are direct
+        // machine-CashBook postings under the driver transaction source key.
+        (fleet.driverLedger || []).forEach(function (tx) {
+          if (['advance', 'advance-return', 'reimbursement'].indexOf(tx.type) >= 0) {
+            expected.push({ key: 'driver:' + tx.id, machineId: tx.machineId });
+          }
+        });
       }
       var issues = [], seen = {};
       entries.forEach(function (x) { seen[x.key] = (seen[x.key] || 0) + 1; if (seen[x.key] > 1) issues.push('Duplicate posting: ' + x.key); });
