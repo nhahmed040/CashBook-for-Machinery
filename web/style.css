@@ -748,3 +748,9 @@ input:focus, select:focus, textarea:focus {
 .mach-payroll-record[hidden]{display:none!important}
 
 .mach-customer-flags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.mach-customer-flag{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:.68rem;font-weight:700;background:#eef2f7;color:#344054}.mach-customer-flag.overdue,.mach-customer-flag.limit{background:#fff0ed;color:#b42318}.mach-customer-flag.follow{background:#fff6df;color:#925f00}.mach-customer-credit-line{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;margin:7px 0 10px;color:var(--muted);font-size:.72rem}.mach-customer-credit-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:13px;margin:12px 0;border:1px solid var(--border);border-radius:13px;background:var(--surface-soft,var(--surface))}.mach-customer-credit-panel>div{display:grid;gap:3px}.mach-customer-credit-panel span{font-size:.7rem;color:var(--muted)}.mach-customer-credit-panel b{font-size:.88rem;overflow-wrap:anywhere}.mach-customer-credit-panel p,.mach-customer-credit-panel button{grid-column:1/-1;margin:0}.mach-customer-credit-panel p{font-size:.78rem;color:var(--muted)}
+
+/* Customer account quick actions and safer payment allocation */
+.mach-customer-payment-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.mach-customer-payment-actions button{flex:1 1 150px;min-height:42px}
+#paymentTripHelp{padding:9px 11px;border-radius:10px;background:var(--accent-soft);margin:0}
+#paymentForm [name="tripIds"]{min-height:112px}
