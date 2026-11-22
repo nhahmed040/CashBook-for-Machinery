@@ -3562,8 +3562,10 @@
       var target = state.books.filter(function (b) { return b.machineId === String(machine.id); })[0];
       if (!target) return { id: '', name: String(machine.name || 'Machine'), balance: 0, entries: [] };
       var entries = (target.entries || []).map(function (e) { return { id: e.id, date: e.date, type: e.type, amount: Number(e.amount) || 0, category: e.category || '', party: e.party || '', note: e.note || '' }; });
-      var balance = entries.reduce(function (sum, e) { return sum + (e.type === 'in' ? e.amount : -e.amount); }, 0);
-      return { id: target.id, name: target.name, balance: balance, entries: entries };
+      var cashIn = entries.reduce(function (sum, e) { return sum + (e.type === 'in' ? e.amount : 0); }, 0);
+      var cashOut = entries.reduce(function (sum, e) { return sum + (e.type === 'out' ? e.amount : 0); }, 0);
+      var balance = cashIn - cashOut;
+      return { id: target.id, name: target.name, balance: balance, cashIn: cashIn, cashOut: cashOut, entries: entries };
     },
     open: function (machine) {
       var id = this.ensure(machine);
