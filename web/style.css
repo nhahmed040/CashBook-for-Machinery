@@ -703,3 +703,19 @@ input:focus, select:focus, textarea:focus {
 .mach-detail-row small{grid-column:1/-1;overflow-wrap:anywhere}
 .mach-cash-in{color:#16834a}.mach-cash-out{color:#b45309}
 @media(max-width:360px){.mach-detail-pairs{grid-template-columns:1fr 1fr}}
+
+/* Customer register and account statement */
+.mach-customer-card{padding:14px;margin:10px 0;border:1px solid var(--border);border-radius:15px;background:var(--surface);box-shadow:var(--shadow-sm,0 2px 8px rgba(20,40,70,.05))}
+.mach-customer-card .mach-record-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.mach-customer-card .mach-record-top b{font-size:.96rem;overflow-wrap:anywhere}
+.mach-customer-card .mach-record-top small{color:var(--muted);font-size:.75rem;text-align:right}
+.mach-customer-card .mach-machine-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mach-customer-card .mach-machine-stats>div{background:var(--surface-soft,var(--surface))}
+.mach-customer-detail{scroll-margin-top:14px}
+.mach-customer-ledger-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:11px 0;border-bottom:1px solid var(--border);align-items:center}
+.mach-customer-ledger-row>div{display:grid;gap:4px;min-width:0}
+.mach-customer-ledger-row b{font-size:.84rem}
+.mach-customer-ledger-row small{font-size:.73rem;color:var(--muted);overflow-wrap:anywhere}
+.mach-customer-ledger-row strong{font-size:.84rem;text-align:right;white-space:nowrap}
+.mach-customer-ledger-row>small{grid-column:1/-1;text-align:right}
+@media(max-width:360px){.mach-customer-card .mach-machine-stats{grid-template-columns:1fr 1fr}.mach-customer-card .mach-record-top{display:grid}}
