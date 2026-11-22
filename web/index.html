@@ -139,6 +139,19 @@
     <section id="view-settings" class="view" hidden>
       <div class="panel" id="cloudPanel"></div>
 
+      <div class="panel settings-fleet-rules">
+        <h2>Fleet &amp; Hauling operating rules</h2>
+        <p class="muted small">These controls describe the business rules used by the Machinery module. They are owner-controlled and are not changed by ordinary transactions.</p>
+        <ul>
+          <li><strong>Owner authority:</strong> the main owner controls entries, approvals and daily reconciliation.</li>
+          <li><strong>Separate machine books:</strong> every machine has its own CashBook, named with its machine name and plate / fleet ID.</li>
+          <li><strong>Revenue and receipts:</strong> completed trips create earned revenue; customer payments are recorded separately as cash received.</li>
+          <li><strong>Driver assignment:</strong> a driver can be assigned to one machine at a time, and driver type must match machine type.</li>
+          <li><strong>Daily closing:</strong> every active machine requires a daily closing or an owner-recorded “No Operation Today”.</li>
+        </ul>
+        <p class="muted small">Use Backup all data regularly. Full backups include fleet records and the supported photos included with those records.</p>
+      </div>
+
       <div class="panel">
         <label class="field"><span data-i18n="language">Language</span>
           <select id="langSel">
@@ -190,7 +203,7 @@
         <button type="button" id="exportBtn" class="block" data-i18n="export_csv">Export this book (CSV)</button>
         <button type="button" id="clearBtn" class="block danger" data-i18n="clear_book">Clear this book</button>
         <p class="muted small" data-i18n="about_note">Data stays on this device. Back it up regularly.</p>
-        <p class="muted small" data-i18n="photos_note">Photos are stored on this device and are not inside the normal backup. Back them up here.</p>
+        <p class="muted small" data-i18n="photos_note">Photos are stored on this device. Use Backup all data to create a portable copy of supported records and photos.</p>
       </div>
     </section>
 
