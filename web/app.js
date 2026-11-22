@@ -3596,9 +3596,12 @@
         var matches = entries.filter(function (e) { return e.key === x.key; });
         var b = state.books.filter(function (book) { return book.machineId === String(x.machineId); })[0];
         if (!matches.length) issues.push('Missing posting: ' + x.key);
-        else if (b && matches.some(function (e) { return e.bookId !== b.id; })) issues.push('Wrong machine book: ' + x.key);
+        if (!b) issues.push('Missing machine CashBook for source: ' + x.key);
+        else if (matches.some(function (e) { return e.bookId !== b.id; })) issues.push('Wrong machine book: ' + x.key);
       });
-      entries.forEach(function (x) { if ((x.key.indexOf('payment:') === 0 || x.key.indexOf('expense:') === 0) && !expected.some(function (e) { return e.key === x.key; })) issues.push('Orphan posting: ' + x.key); });
+      entries.forEach(function (x) {
+        if ((x.key.indexOf('payment:') === 0 || x.key.indexOf('expense:') === 0 || x.key.indexOf('driver:') === 0) && !expected.some(function (e) { return e.key === x.key; })) issues.push('Orphan posting: ' + x.key);
+      });
       return { checked: expected.length, postings: entries.length, issues: issues };
     },
     rename: function (machine) {
