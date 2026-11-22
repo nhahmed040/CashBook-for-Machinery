@@ -728,3 +728,11 @@ input:focus, select:focus, textarea:focus {
 .mach-warning-text{color:#a65b12!important;font-weight:700}
 .mach-success-text{color:#16834a!important;font-weight:700}
 @media(max-width:380px){.mach-filter-grid{grid-template-columns:1fr}}
+
+/* Driver register search and mobile profile cards */
+.mach-driver-search-label{display:grid;gap:6px;margin:12px 0 4px;font-size:.8rem;font-weight:650;color:var(--muted)}
+.mach-driver-search-label input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft,var(--surface));color:var(--text);font:inherit}
+.mach-driver-record{padding:14px;border-radius:14px;margin-top:10px}
+.mach-driver-record .mach-record-top{align-items:center;gap:10px}
+.mach-driver-record .mach-record-top small{max-width:48%;text-align:right}
+.mach-driver-record[hidden]{display:none!important}
