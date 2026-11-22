@@ -2726,7 +2726,7 @@
     var info = backupInfo(), box = $('backupState');
     if (box) {
       if (info.last) {
-        box.textContent = t('last_backup', { d: fmtDate(new Date(info.last).toISOString().slice(0, 10)), e: info.entries || 0, p: info.projects || 0 });
+        box.textContent = t('last_backup', { d: fmtDate(new Date(info.last).toISOString().slice(0, 10)), e: info.entries || 0, p: info.projects || 0 }) + ' · Fleet: ' + [info.machines,info.trips,info.machineryPayments,info.machineryExpenses,info.machineryDrivers,info.machineryCustomers,info.machineryMaintenance,info.machineryDriverLedger,info.machineryDailyClosings].reduce(function(n,v){return n+(Number(v)||0);},0) + ' records · Photos: ' + (info.photos||0);
         box.className = 'muted small';
       } else {
         box.textContent = t('no_backup_yet');
