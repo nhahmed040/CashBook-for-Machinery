@@ -664,3 +664,8 @@ input:focus, select:focus, textarea:focus {
 .mach-status.is-missing{background:#fff0e8;color:#a64a17}
 .mach-status.is-pending{background:#fff7df;color:#8a6412}
 .mach-status.is-done{background:#e7f6ec;color:#207344}
+
+/* Driver account cards */
+.mach-driver-account{padding:13px;border:1px solid var(--border);border-radius:14px;margin:9px 0;background:var(--surface)}
+.mach-driver-account .mach-metrics{margin:10px 0}
+.mach-driver-account .mach-metrics span{padding:8px;border-radius:10px;background:var(--surface-soft,var(--surface))}
