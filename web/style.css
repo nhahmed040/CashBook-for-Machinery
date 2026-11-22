@@ -736,3 +736,9 @@ input:focus, select:focus, textarea:focus {
 .mach-driver-record .mach-record-top{align-items:center;gap:10px}
 .mach-driver-record .mach-record-top small{max-width:48%;text-align:right}
 .mach-driver-record[hidden]{display:none!important}
+
+/* Payroll history mobile filters */
+.mach-payroll-record{padding:14px;border-radius:14px;margin-top:10px}
+.mach-payroll-record .mach-record-top{align-items:center;gap:10px}
+.mach-payroll-record .mach-record-top small{font-weight:700;white-space:nowrap}
+.mach-payroll-record[hidden]{display:none!important}
