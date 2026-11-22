@@ -2664,6 +2664,15 @@
   var PREREST_KEY = 'cashbook.prerestore.v1'; // the data that was on the phone before the last restore
   function backupInfo() { try { return JSON.parse(localStorage.getItem(BACKUP_KEY) || '{}') || {}; } catch (e) { return {}; } }
   function setBackupInfo(o) { try { localStorage.setItem(BACKUP_KEY, JSON.stringify(o)); } catch (e) { /* ignore */ } }
+  function countDriverPhotos(fleet) {
+    if (!fleet || !Array.isArray(fleet.drivers)) return 0;
+    var fields = ['idPhotoFront', 'idPhotoBack', 'licencePhoto'];
+    return fleet.drivers.reduce(function (count, driver) {
+      return count + fields.filter(function (key) {
+        return typeof driver[key] === 'string' && driver[key].indexOf('data:image/') === 0;
+      }).length;
+    }, 0);
+  }
   function dataCount() {
     var n = 0;
     state.books.forEach(function (b) { n += b.entries.length; });
@@ -2675,12 +2684,14 @@
       machineryDrivers: m ? m.drivers.length : 0, machineryCustomers: m ? m.customers.length : 0,
       machineryMaintenance: m ? m.maintenance.length : 0,
       machineryDriverLedger: m ? (m.driverLedger || []).length : 0,
-      machineryDailyClosings: m ? (m.dailyClosings || []).length : 0
+      machineryDailyClosings: m ? (m.dailyClosings || []).length : 0,
+      machineryAuditLog: m ? (m.auditLog || []).length : 0,
+      machineryDriverPhotos: countDriverPhotos(m)
     };
   }
   function hasData() {
     var c = dataCount();
-    return c.entries + c.projects + c.contacts + c.machines + c.operations + c.trips + c.machineryExpenses + c.machineryPayments + c.machineryDrivers + c.machineryCustomers + c.machineryMaintenance + c.machineryDriverLedger + c.machineryDailyClosings > 0;
+    return c.entries + c.projects + c.contacts + c.machines + c.operations + c.trips + c.machineryExpenses + c.machineryPayments + c.machineryDrivers + c.machineryCustomers + c.machineryMaintenance + c.machineryDriverLedger + c.machineryDailyClosings + c.machineryAuditLog > 0;
   }
 
   function buildBackup() {
@@ -2699,7 +2710,9 @@
     })).then(function (pairs) {
       var n = 0;
       pairs.forEach(function (x) { if (x[1]) { copy.photos[x[0]] = x[1]; n++; } });
-      return { text: JSON.stringify(copy), photos: n };
+      // Driver ID and licence photos are stored inline in driver records, not in CBPhotos.
+      // Count them too because they are included in the machinery payload above.
+      return { text: JSON.stringify(copy), photos: n + countDriverPhotos(copy.machinery) };
     });
   }
   function doBackup() {
@@ -2713,6 +2726,7 @@
           machineryPayments: c.machineryPayments, machineryDrivers: c.machineryDrivers,
           machineryCustomers: c.machineryCustomers, machineryMaintenance: c.machineryMaintenance,
           machineryDriverLedger: c.machineryDriverLedger, machineryDailyClosings: c.machineryDailyClosings,
+          machineryAuditLog: c.machineryAuditLog, machineryDriverPhotos: c.machineryDriverPhotos,
           photos: r.photos, snooze: 0
         });
         renderBackupState();
@@ -2726,7 +2740,7 @@
     var info = backupInfo(), box = $('backupState');
     if (box) {
       if (info.last) {
-        box.textContent = t('last_backup', { d: fmtDate(new Date(info.last).toISOString().slice(0, 10)), e: info.entries || 0, p: info.projects || 0 }) + ' · Fleet: ' + [info.machines,info.trips,info.machineryPayments,info.machineryExpenses,info.machineryDrivers,info.machineryCustomers,info.machineryMaintenance,info.machineryDriverLedger,info.machineryDailyClosings].reduce(function(n,v){return n+(Number(v)||0);},0) + ' records · Photos: ' + (info.photos||0);
+        box.textContent = t('last_backup', { d: fmtDate(new Date(info.last).toISOString().slice(0, 10)), e: info.entries || 0, p: info.projects || 0 }) + ' · Fleet: ' + [info.machines,info.operations,info.trips,info.machineryPayments,info.machineryExpenses,info.machineryDrivers,info.machineryCustomers,info.machineryMaintenance,info.machineryDriverLedger,info.machineryDailyClosings,info.machineryAuditLog].reduce(function(n,v){return n+(Number(v)||0);},0) + ' records · Photos: ' + (info.photos||0) + ' (including driver IDs/licences)';
         box.className = 'muted small';
       } else {
         box.textContent = t('no_backup_yet');
