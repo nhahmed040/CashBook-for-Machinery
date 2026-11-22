@@ -3557,6 +3557,14 @@
       }
       renderAll(); return true;
     },
+    snapshot: function (machine) {
+      if (!machine || !machine.id) return null;
+      var target = state.books.filter(function (b) { return b.machineId === String(machine.id); })[0];
+      if (!target) return { id: '', name: String(machine.name || 'Machine'), balance: 0, entries: [] };
+      var entries = (target.entries || []).map(function (e) { return { id: e.id, date: e.date, type: e.type, amount: Number(e.amount) || 0, category: e.category || '', party: e.party || '', note: e.note || '' }; });
+      var balance = entries.reduce(function (sum, e) { return sum + (e.type === 'in' ? e.amount : -e.amount); }, 0);
+      return { id: target.id, name: target.name, balance: balance, entries: entries };
+    },
     audit: function () {
       var entries = [];
       state.books.forEach(function (b) { (b.entries || []).forEach(function (e) { if (e.machineSourceId) entries.push({ key: String(e.machineSourceId), bookId: b.id }); }); });
