@@ -759,3 +759,7 @@ input:focus, select:focus, textarea:focus {
 .mach-audit-search{display:flex;flex-direction:column;gap:5px;font-size:.8rem;font-weight:600;margin:10px 0}
 .mach-audit-search input{width:100%;min-width:0}
 .mach-fuel-record[hidden],.mach-maintenance-record[hidden],.mach-audit-record[hidden]{display:none!important}
+
+/* Trip and machine CashBook quick actions */
+.mach-record [data-trip-record-payment]{margin:5px 6px 0 0}
+.mach-machine-detail .mach-detail-pairs{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}
