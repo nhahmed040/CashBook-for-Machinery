@@ -3565,6 +3565,13 @@
       var balance = entries.reduce(function (sum, e) { return sum + (e.type === 'in' ? e.amount : -e.amount); }, 0);
       return { id: target.id, name: target.name, balance: balance, entries: entries };
     },
+    open: function (machine) {
+      var id = this.ensure(machine);
+      if (!id) return false;
+      showView('entries');
+      openBookById(id);
+      return true;
+    },
     audit: function () {
       var entries = [];
       state.books.forEach(function (b) { (b.entries || []).forEach(function (e) { if (e.machineSourceId) entries.push({ key: String(e.machineSourceId), bookId: b.id }); }); });
