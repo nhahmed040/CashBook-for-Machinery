@@ -657,3 +657,10 @@ input:focus, select:focus, textarea:focus {
 .mach-action-grid button span{font-size:.78rem;font-weight:650;line-height:1.25}
 .mach-machine-card{padding:12px;border-radius:13px;background:var(--surface-soft,var(--surface));margin:8px 0}
 @media(min-width:600px){.mach-action-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Daily closing workflow */
+.mach-closing-card{padding:12px;border:1px solid var(--border);border-radius:13px;margin:9px 0;background:var(--surface)}
+.mach-status{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:.68rem;font-weight:750;white-space:nowrap}
+.mach-status.is-missing{background:#fff0e8;color:#a64a17}
+.mach-status.is-pending{background:#fff7df;color:#8a6412}
+.mach-status.is-done{background:#e7f6ec;color:#207344}
