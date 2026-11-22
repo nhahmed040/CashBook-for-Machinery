@@ -705,6 +705,10 @@ input:focus, select:focus, textarea:focus {
 @media(max-width:360px){.mach-detail-pairs{grid-template-columns:1fr 1fr}}
 
 /* Customer register and account statement */
+.mach-customer-search-label{display:grid;gap:6px;margin:10px 0 14px;font-size:.76rem;font-weight:650;color:var(--muted)}
+.mach-customer-search-label input{width:100%;min-width:0;padding:12px 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft,var(--surface));color:var(--text);font:inherit;font-size:.86rem}
+.mach-customer-card[hidden]{display:none!important}
+.mach-customer-contact{font-size:.76rem;color:var(--muted);overflow-wrap:anywhere;margin:5px 0 9px}
 .mach-customer-card{padding:14px;margin:10px 0;border:1px solid var(--border);border-radius:15px;background:var(--surface);box-shadow:var(--shadow-sm,0 2px 8px rgba(20,40,70,.05))}
 .mach-customer-card .mach-record-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .mach-customer-card .mach-record-top b{font-size:.96rem;overflow-wrap:anywhere}
