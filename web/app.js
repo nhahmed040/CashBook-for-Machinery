@@ -3563,7 +3563,7 @@
 
   /* ---------- start ---------- */
   touchBooks();                      // remember how each book looks now, so only later changes count as an update
-  showView('entries');
+  showView('dashboard');
   purgeExpiredTrashPhotos();
   renderAll();
   showLock();
