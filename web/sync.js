@@ -268,7 +268,7 @@
     function driverAccountGet(uid) { return db('GET', 'driverAccounts/' + encodeURIComponent(uid)); }
     function driverDataGet(driverId) { return db('GET', 'driverData/' + encodeURIComponent(driverId)); }
     function driverDataCreate(driverId, collection, id, record) {
-      var allowed = ['trips','attendance','issues','disputes','acknowledgements','messageReplies','messages','notifications','messageReads'];
+      var allowed = ['trips','attendance','issues','collections','disputes','acknowledgements','messageReplies','messages','notifications','messageReads'];
       if (allowed.indexOf(collection) < 0 || !driverId || !id) return Promise.reject(CloudError('invalid-driver-record'));
       return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
     }
@@ -337,6 +337,9 @@
       } },
       'attendance': { '$recordId': {
         '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordAttendance === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
+      } },
+      'collections': { '$collectionId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordCollections === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
       } },
       'issues': { '$issueId': {
         '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportIssues === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
