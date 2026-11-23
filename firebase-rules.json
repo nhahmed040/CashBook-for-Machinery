@@ -72,7 +72,8 @@
           "$ackId": {
             ".write": "auth != null && auth.token.role === 'driver' && auth.token.active === true && auth.token.driverId === $driverId && auth.token.permissions.confirmNotifications === true && !data.exists()"
           }
-        }
+        },
+        ".write": "auth != null && auth.token.owner === true"
       }
     }
   }
