@@ -41,7 +41,7 @@ if(!window.CBDriverDataGet)throw new Error('Driver cloud sync is not available.'
 var counts={trips:0,attendance:0,issues:0,collections:0,messages:0},drivers=state.drivers.filter(function(d){return !!d.authUid;});
 if(!drivers.length)throw new Error('No linked driver accounts yet. Create driver accounts in each driver profile first.');
 for(var di=0;di<drivers.length;di++){
-var d=drivers[di],remote=await window.CBDriverDataGet(d.id)||{},tripMap=remote.trips||{},attendanceMap=remote.attendance||{},issueMap=remote.issues||{},collectionMap=remote.collections||{},messageMap=remote.messages||{},replyMap=remote.messageReplies||{},readMap=remote.messageReads||{},ackMap=remote.acknowledgements||{};
+var d=drivers[di],remote=await window.CBDriverDataGet(d.id)||{},tripMap=remote.trips||{},attendanceMap=remote.attendance||{},issueMap=remote.issues||{},collectionMap=remote.collections||{},messageMap=remote.messages||{},notificationMap=remote.notifications||{},replyMap=remote.messageReplies||{},readMap=remote.messageReads||{},ackMap=remote.acknowledgements||{};
 Object.keys(tripMap).forEach(function(key){
 var r=tripMap[key]||{};if(state.trips.some(function(t){return t.remoteId===key||t.id===key;}))return;
 var m=machine(r.machineId||d.machineId);if(!m||!driverWasAssignedToMachine(d,m,r.date))return;
@@ -72,6 +72,7 @@ var issue={id:key,remoteId:key,driverId:d.id,machineId:m.id,date:r.date||today()
 state.issues.push(issue);logAudit('Imported','Driver issue',issue,null);counts.issues++;
 });
 Object.keys(messageMap).forEach(function(key){var r=messageMap[key]||{};if(state.messages.some(function(x){return x.remoteId===key||x.id===key;}))return;state.messages.push({id:key,remoteId:key,driverId:d.id,subject:r.subject||'Driver message',message:r.message||r.body||'',date:r.date||today(),created:r.createdAt||new Date().toISOString(),direction:r.senderRole==='owner'?'owner':'driver'});counts.messages++;});
+Object.keys(notificationMap).forEach(function(key){var r=notificationMap[key]||{};if(state.messages.some(function(x){return x.remoteId===key||x.id===key;}))return;state.messages.push({id:key,remoteId:key,driverId:d.id,subject:r.title||'Notification',message:r.message||'',date:r.date||today(),created:r.createdAt||new Date().toISOString(),direction:'owner',type:'notification'});counts.messages++;});
 Object.keys(replyMap).forEach(function(key){var r=replyMap[key]||{},msg=state.messages.find(function(x){return x.driverId===d.id&&(x.remoteId===r.messageId||x.id===r.messageId);});if(msg){msg.reply=r.reply||'';msg.replyAt=r.createdAt||'';msg.replyBy=d.name;}});
 Object.keys(readMap).forEach(function(key){var r=readMap[key]||{},msg=state.messages.find(function(x){return x.driverId===d.id&&(x.remoteId===r.messageId||x.id===r.messageId);});if(msg)msg.readAt=r.readAt||r.createdAt||new Date().toISOString();});
 Object.keys(ackMap).forEach(function(key){var r=ackMap[key]||{},msg=state.messages.find(function(x){return x.driverId===d.id&&(x.remoteId===r.notificationId||x.id===r.notificationId);});if(msg)msg.acknowledgedAt=r.acknowledgedAt||r.createdAt||new Date().toISOString();});
