@@ -316,13 +316,13 @@
       '.read': "auth != null && (auth.token.owner === true || (auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true))",
       '.write': 'auth != null && auth.token.owner === true',
       'trips': { '$tripId': {
-        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordTrips === true && auth.token.tripMode !== 'disabled' && newData.child('driverId').val() === $driverId && newData.child('approvalStatus').val() === (auth.token.tripMode === 'auto-approval' ? 'approved' : 'pending') && !data.exists()"
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordTrips === true && auth.token.tripMode !== 'disabled' && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && newData.child('approvalStatus').val() === (auth.token.tripMode === 'auto-approval' ? 'approved' : 'pending') && !data.exists()"
       } },
       'attendance': { '$recordId': {
-        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordAttendance === true && newData.child('driverId').val() === $driverId && !data.exists()"
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordAttendance === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
       } },
       'issues': { '$issueId': {
-        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportIssues === true && newData.child('driverId').val() === $driverId && !data.exists()"
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportIssues === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
       } },
       'disputes': { '$disputeId': {
         '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportDisputes === true && newData.child('driverId').val() === $driverId && !data.exists()"
