@@ -2446,6 +2446,31 @@
     });
   });
 
+  /* ---------- top-right owner menu ---------- */
+  $('moreMenuBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var menu = $('topMenu');
+    menu.hidden = !menu.hidden;
+    $('moreMenuBtn').setAttribute('aria-expanded', String(!menu.hidden));
+  });
+  $('topMenu').addEventListener('click', function (e) {
+    var item = e.target.closest('[data-top-action]');
+    if (!item) return;
+    var action = item.getAttribute('data-top-action');
+    $('topMenu').hidden = true;
+    $('moreMenuBtn').setAttribute('aria-expanded', 'false');
+    if (action === 'settings') showView('settings');
+    else if (action === 'backup') { showView('settings'); $('backupBtn').click(); }
+    else if (action === 'restore') { showView('settings'); $('restoreBtn').click(); }
+    else if (action === 'about') openModal('aboutModal');
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.top-menu-wrap')) {
+      $('topMenu').hidden = true;
+      $('moreMenuBtn').setAttribute('aria-expanded', 'false');
+    }
+  });
+
   /* ---------- books ---------- */
   $('bookSelect').addEventListener('change', function () {
     state.current = this.value;
