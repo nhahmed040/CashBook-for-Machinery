@@ -16,7 +16,7 @@ function database() {
   const config=process.env.FIREBASE_CONFIG?JSON.parse(process.env.FIREBASE_CONFIG):{};
   const url=process.env.FIREBASE_DATABASE_URL||config.databaseURL;
   if(!url) throw new HttpsError('failed-precondition','Configure FIREBASE_DATABASE_URL for the deployed function.');
-  return getDatabase().ref();
+  return getDatabase(undefined, url).ref();
 }
 function validateInput(data) {
   const driverId=String(data.driverId||'').trim(),machineId=String(data.machineId||'').trim(),email=String(data.email||'').trim().toLowerCase();
