@@ -5,3 +5,9 @@ local.properties
 *.apk
 *.iml
 .idea/
+
+# Firebase local tooling and private configuration
+.firebase/
+functions/node_modules/
+functions/.env*
+!functions/.env.example

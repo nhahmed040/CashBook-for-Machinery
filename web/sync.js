@@ -265,14 +265,31 @@
     function setRole(id, uid, role) { return db('PUT', 'books/' + id + '/members/' + uid + '/role', role === 'edit' ? 'edit' : 'view'); }
     function removeMember(id, uid) { return db('DELETE', 'books/' + id + '/members/' + uid); }
     function deleteBook(id) { return db('DELETE', 'invites/' + id).then(function () { return db('DELETE', 'books/' + id); }); }   // invites first: their rule needs the book's owner
+    function driverAccountGet(uid) { return db('GET', 'driverAccounts/' + encodeURIComponent(uid)); }
+    function driverDataGet(driverId) { return db('GET', 'driverData/' + encodeURIComponent(driverId)); }
+    function driverDataCreate(driverId, collection, id, record) {
+      var allowed = ['trips','attendance','issues','collections','disputes','acknowledgements','messageReplies','messages','notifications','messageReads'];
+      if (allowed.indexOf(collection) < 0 || !driverId || !id) return Promise.reject(CloudError('invalid-driver-record'));
+      return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
+    }
+    function driverDataUpdate(driverId, collection, id, record) {
+      var allowed = ['trips','attendance','issues','collections','disputes','acknowledgements','messageReplies'];
+      if (allowed.indexOf(collection) < 0 || !driverId || !id) return Promise.reject(CloudError('invalid-driver-record'));
+      return db('PATCH', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
+    }
+    function driverDataSet(driverId, key, value) {
+      if (!driverId || ['summary','messages','notifications'].indexOf(key) < 0) return Promise.reject(CloudError('invalid-driver-record'));
+      return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + key, value);
+    }
 
     return {
-      cfg: cfg, patchCfg: patchCfg, signUp: signUp, signIn: signIn, signInGoogle: signInGoogle, signOut: signOut, signedIn: signedIn,
+      cfg: cfg, patchCfg: patchCfg, token: token, signUp: signUp, signIn: signIn, signInGoogle: signInGoogle, signOut: signOut, signedIn: signedIn,
       backupPut: backupPut, backupGet: backupGet,
       createBook: createBook, setBookName: setBookName, profilePut: profilePut, profileGet: profileGet,
       indexPut: indexPut, indexGet: indexGet, indexDelete: indexDelete, getBook: getBook, pushEntries: pushEntries,
       createInvite: createInvite, revokeInvites: revokeInvites, join: join,
-      setRole: setRole, removeMember: removeMember, deleteBook: deleteBook
+      setRole: setRole, removeMember: removeMember, deleteBook: deleteBook,
+      driverAccountGet: driverAccountGet, driverDataGet: driverDataGet, driverDataCreate: driverDataCreate, driverDataUpdate: driverDataUpdate, driverDataSet: driverDataSet
     };
   }
 
@@ -302,6 +319,46 @@
       } }
     }
   };
+
+  // Driver account rules mirror firebase-rules.json. Admin credentials are never exposed to clients.
+  RULES.rules.driverAccounts = {
+    '.indexOn': ['driverId'],
+    '$uid': {
+      '.read': 'auth != null && (auth.token.owner === true || auth.uid === $uid)',
+      '.write': 'auth != null && auth.token.owner === true'
+    }
+  };
+  RULES.rules.driverData = {
+    '$driverId': {
+      '.read': "auth != null && (auth.token.owner === true || (auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true))",
+      '.write': 'auth != null && auth.token.owner === true',
+      'trips': { '$tripId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordTrips === true && auth.token.tripMode !== 'disabled' && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && newData.child('approvalStatus').val() === (auth.token.tripMode === 'auto-approval' ? 'approved' : 'pending') && !data.exists()"
+      } },
+      'attendance': { '$recordId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordAttendance === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
+      } },
+      'collections': { '$collectionId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordCollections === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
+      } },
+      'issues': { '$issueId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportIssues === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
+      } },
+      'disputes': { '$disputeId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportDisputes === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } },
+      'acknowledgements': { '$ackId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.confirmNotifications === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } },
+      'messageReads': { '$readId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } },
+      'messageReplies': { '$replyId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.replyMessages === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } }
+    }
+  };
+
 
   return {
     sig: sig, pack: pack, merge: merge, FIELDS: FIELDS, RULES: RULES,

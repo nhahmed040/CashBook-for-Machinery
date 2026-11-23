@@ -25,7 +25,8 @@
       <button type="button" id="syncDot" class="sync" aria-label="Sync" hidden></button>
       <select id="bizSelect" aria-label="Business" hidden></select>
       <select id="bookSelect" aria-label="Book"></select>
-      <button type="button" id="bookBtn" class="icon" data-i18n-aria="books" aria-label="Books">⋮</button>
+      <button type="button" id="bookBtn" class="icon" data-i18n-aria="books" aria-label="Books">📚</button>
+      <div class="top-menu-wrap"><button type="button" id="moreMenuBtn" class="icon" aria-label="More options" aria-haspopup="true" aria-expanded="false">⋮</button><div id="topMenu" class="top-menu" hidden><button type="button" data-top-action="driver">Driver Portal</button><button type="button" data-top-action="settings">Settings &amp; security</button><button type="button" data-top-action="backup">Backup all data</button><button type="button" data-top-action="restore">Restore from file</button><button type="button" data-top-action="about">About</button></div></div>
     </div>
   </header>
 
@@ -214,12 +215,12 @@
 
   <button type="button" id="fab" class="fab" aria-label="Add entry">+</button>
 
-  <nav class="tabs">
-    <button type="button" data-view="entries" class="active"><span>📒</span><b data-i18n="entries">Entries</b></button>
-
-    <button type="button" data-view="machinery"><span>🚜</span><b>Machinery</b></button>
-    <button type="button" data-view="reports"><span>📊</span><b data-i18n="reports">Reports</b></button>
-    <button type="button" data-view="settings"><span>⚙️</span><b data-i18n="settings">Settings</b></button>
+  <nav class="tabs" aria-label="Main navigation">
+    <button type="button" data-view="dashboard" class="active"><span>⌂</span><b>Dashboard</b></button>
+    <button type="button" data-view="operations"><span>⇄</span><b>Operations</b></button>
+    <button type="button" data-view="finance"><span>▤</span><b>Finance</b></button>
+    <button type="button" data-view="fleet"><span>🚜</span><b>Fleet</b></button>
+    <button type="button" data-view="more"><span>•••</span><b>More</b></button>
   </nav>
 
   <!-- Entry add / edit -->
@@ -374,6 +375,8 @@
   <script src="sync.js"></script>
   <script src="cloud-config.js"></script>
   <script src="app.js"></script>
+  <script src="driver-accounting.js"></script>
+  <script src="driver-admin.js"></script>
   <script src="machinery.js"></script>
 </body>
 </html>

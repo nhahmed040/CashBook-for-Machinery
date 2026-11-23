@@ -1891,17 +1891,32 @@
   }
 
   var VIEWS = ['entries', 'machinery', 'reports', 'settings'];
+  var mainSection = 'dashboard';
+  var cashBooksReturn = false;
   function showView(name) {
+    var sectionGroups = { dashboard: 'overview', operations: 'operations', finance: 'finance', fleet: 'fleet', more: 'more' };
+    if (sectionGroups[name]) {
+      cashBooksReturn = false;
+      mainSection = name;
+      if (window.CBMachineryNavigate) window.CBMachineryNavigate(sectionGroups[name]);
+      name = 'machinery';
+    } else if (name === 'entries') {
+      mainSection = 'finance';
+    } else if (name === 'settings' || name === 'reports') {
+      mainSection = 'more';
+    }
     ui.view = name;
     VIEWS.forEach(function (v) { $('view-' + v).hidden = v !== name; });
     Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) {
-      b.classList.toggle('active', b.getAttribute('data-view') === name);
+      b.classList.toggle('active', b.getAttribute('data-view') === mainSection);
     });
     document.body.classList.remove('view-entries', 'view-machinery', 'view-reports', 'view-settings');
     document.body.classList.add('view-' + name);
     applyEntriesScreen();
     window.scrollTo(0, 0);
   }
+  window.CBOpenCashBooks = function () { cashBooksReturn = true; showView('entries'); };
+  window.CBOpenSettings = function () { showView('settings'); };
 
   // Android Back navigation: close transient UI before leaving a screen.
   window.__handleAndroidBack = function () {
@@ -1953,6 +1968,11 @@
       return true;
     }
 
+    if (ui.view === 'entries' && cashBooksReturn) {
+      cashBooksReturn = false;
+      showView('finance');
+      return true;
+    }
     if (ui.bookOpen) {
       ui.bookOpen = false;
       renderAll();
@@ -2421,11 +2441,35 @@
     b.addEventListener('click', function () {
       var v = b.getAttribute('data-view');
       buzz();
-      if (v === 'entries' && ui.view === 'entries') ui.bookOpen = false;   // tapping Entries again goes back to the list of books
       showView(v);
       if (v === 'reports') renderReports();
-
     });
+  });
+
+  /* ---------- top-right owner menu ---------- */
+  $('moreMenuBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var menu = $('topMenu');
+    menu.hidden = !menu.hidden;
+    $('moreMenuBtn').setAttribute('aria-expanded', String(!menu.hidden));
+  });
+  $('topMenu').addEventListener('click', function (e) {
+    var item = e.target.closest('[data-top-action]');
+    if (!item) return;
+    var action = item.getAttribute('data-top-action');
+    $('topMenu').hidden = true;
+    $('moreMenuBtn').setAttribute('aria-expanded', 'false');
+    if (action === 'driver') window.location.href = 'driver.html';
+    else if (action === 'settings') showView('settings');
+    else if (action === 'backup') { showView('settings'); $('backupBtn').click(); }
+    else if (action === 'restore') { showView('settings'); $('restoreBtn').click(); }
+    else if (action === 'about') openModal('aboutModal');
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.top-menu-wrap')) {
+      $('topMenu').hidden = true;
+      $('moreMenuBtn').setAttribute('aria-expanded', 'false');
+    }
   });
 
   /* ---------- books ---------- */
@@ -2911,6 +2955,12 @@
       now: function () { return Date.now(); },
       defaults: window.CB_CLOUD_DEFAULTS || {}
     });
+    window.CBGetFirebaseIdToken = function () { return cloud.token(); };
+    window.CBGetFirebaseConfig = function () { return cloud.cfg(); };
+    window.CBDriverDataGet = function (driverId) { return cloud.driverDataGet(driverId); };
+    window.CBDriverDataCreate = function (driverId, collection, id, record) { return cloud.driverDataCreate(driverId, collection, id, record); };
+    window.CBDriverDataUpdate = function (driverId, collection, id, record) { return cloud.driverDataUpdate(driverId, collection, id, record); };
+    window.CBDriverDataSet = function (driverId, key, value) { return cloud.driverDataSet(driverId, key, value); };
     var info = {};            // online book id -> { meta, members } from the last sync
     var invite = '';          // last invite text shown
     var busy = false, again = false, timer = 0, advanced = false;
