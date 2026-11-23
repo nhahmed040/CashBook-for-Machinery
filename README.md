@@ -164,3 +164,16 @@ Notes: the free Firebase plan is plenty for cash books. Anyone with your databas
 ## Google sign-in (Android app)
 
 "Continue with Google" appears on the sign-in screen in the Android app. It needs, in Firebase: Authentication → Sign-in method → **Google** enabled, and an **Android app** registered with package `com.nhahmed.cashbook` and the SHA-1 of `private signing key (not included)` (`keytool -list -v -keystore private signing key (not included) -alias cashbook -storepass cashbook-sideload`). The Web client ID of the Google provider is set in `web/cloud-config.js`. A Google account with the same email as an existing email/password account is the same account in CashBook. Phone (SMS) two-factor is not supported yet.
+
+
+## Secure driver account backend (deployment required)
+
+The owner-managed driver login backend is scaffolded in `functions/` using Firebase Authentication and the Admin SDK. Driver accounts are created, permission claims are assigned, and accounts can be suspended/reactivated only by a caller with the `owner: true` custom claim. Realtime Database rules restrict driver reads to their own account/data and permit only explicitly authorized create-only driver actions.
+
+Before deployment:
+1. Configure Firebase Realtime Database and set `FIREBASE_DATABASE_URL` for Functions.
+2. Create the owner Firebase Authentication account.
+3. In a trusted admin environment with a service-account credential (never in the app), run `OWNER_EMAIL=owner@example.com node scripts/set-owner-claim.js`.
+4. Deploy from the repository root with Firebase CLI: `firebase deploy --only functions,database`.
+
+The Android/web client does not contain Admin credentials. Driver sign-in and remote permission enforcement become active only after this backend is deployed and the driver client is connected to it.
