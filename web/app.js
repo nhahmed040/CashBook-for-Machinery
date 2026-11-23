@@ -2956,6 +2956,9 @@
     });
     window.CBGetFirebaseIdToken = function () { return cloud.token(); };
     window.CBGetFirebaseConfig = function () { return cloud.cfg(); };
+    window.CBDriverDataGet = function (driverId) { return cloud.driverDataGet(driverId); };
+    window.CBDriverDataUpdate = function (driverId, collection, id, record) { return cloud.driverDataUpdate(driverId, collection, id, record); };
+    window.CBDriverDataSet = function (driverId, key, value) { return cloud.driverDataSet(driverId, key, value); };
     var info = {};            // online book id -> { meta, members } from the last sync
     var invite = '';          // last invite text shown
     var busy = false, again = false, timer = 0, advanced = false;
