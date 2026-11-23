@@ -172,7 +172,7 @@ The owner-managed driver login backend is scaffolded in `functions/` using Fireb
 
 Before deployment:
 1. Configure Firebase Realtime Database and set `FIREBASE_DATABASE_URL` for Functions.
-2. Create the owner Firebase Authentication account.
+2. Create the owner Firebase Authentication account and install backend dependencies with `npm install --prefix functions`.
 3. In a trusted admin environment with a service-account credential (never in the app), run `OWNER_EMAIL=owner@example.com node scripts/set-owner-claim.js`.
 4. Deploy from the repository root with Firebase CLI: `firebase deploy --only functions,database`.
 
