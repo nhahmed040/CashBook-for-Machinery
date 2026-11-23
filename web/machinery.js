@@ -41,7 +41,7 @@ if(!window.CBDriverDataGet)throw new Error('Driver cloud sync is not available.'
 var counts={trips:0,attendance:0,issues:0,collections:0,messages:0},drivers=state.drivers.filter(function(d){return !!d.authUid;});
 if(!drivers.length)throw new Error('No linked driver accounts yet. Create driver accounts in each driver profile first.');
 for(var di=0;di<drivers.length;di++){
-var d=drivers[di],remote=await window.CBDriverDataGet(d.id)||{},tripMap=remote.trips||{},attendanceMap=remote.attendance||{},issueMap=remote.issues||{},messageMap=remote.messages||{},replyMap=remote.messageReplies||{},readMap=remote.messageReads||{},ackMap=remote.acknowledgements||{};
+var d=drivers[di],remote=await window.CBDriverDataGet(d.id)||{},tripMap=remote.trips||{},attendanceMap=remote.attendance||{},issueMap=remote.issues||{},collectionMap=remote.collections||{},messageMap=remote.messages||{},replyMap=remote.messageReplies||{},readMap=remote.messageReads||{},ackMap=remote.acknowledgements||{};
 Object.keys(tripMap).forEach(function(key){
 var r=tripMap[key]||{};if(state.trips.some(function(t){return t.remoteId===key||t.id===key;}))return;
 var m=machine(r.machineId||d.machineId);if(!m||!driverWasAssignedToMachine(d,m,r.date))return;
