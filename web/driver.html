@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Driver Portal · CashBook for Machinery</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="driver.css">
+</head>
+<body class="driver-body">
+  <header class="top">
+    <h1>Driver Portal</h1>
+    <button type="button" id="driverLogout" class="icon" hidden>Log out</button>
+  </header>
+  <main class="driver-main">
+    <section id="driverLogin" class="driver-login">
+      <div class="panel">
+        <h2>Driver sign in</h2>
+        <p class="muted small">Sign in with the account created by your business owner.</p>
+        <form id="driverLoginForm" class="driver-form">
+          <label class="field"><span>Email</span><input name="email" type="email" autocomplete="username" required></label>
+          <label class="field"><span>Password</span><input name="password" type="password" autocomplete="current-password" required></label>
+          <button type="submit" class="primary block">Sign in</button>
+        </form>
+        <p id="driverLoginError" class="err" role="alert"></p>
+      </div>
+    </section>
+    <section id="driverApp" hidden>
+      <div class="driver-welcome panel">
+        <div><h2 id="driverName">Driver</h2><p id="driverMachine" class="muted small"></p></div>
+        <span id="driverAccountStatus" class="driver-status">Active</span>
+      </div>
+      <nav class="driver-nav" aria-label="Driver navigation">
+        <button type="button" data-driver-view="home" class="active">Home</button>
+        <button type="button" data-driver-view="trips">Trips &amp; Loads</button>
+        <button type="button" data-driver-view="account">My Account</button>
+        <button type="button" data-driver-view="attendance">Attendance</button>
+        <button type="button" data-driver-view="issues">Report Issues</button>
+        <button type="button" data-driver-view="messages">Messages</button>
+        <button type="button" data-driver-view="notifications">Notifications</button>
+      </nav>
+      <section id="driver-home" class="driver-view">
+        <div id="driverHomeContent"></div>
+      </section>
+      <section id="driver-trips" class="driver-view" hidden>
+        <div id="driverTripsContent"></div>
+      </section>
+      <section id="driver-account" class="driver-view" hidden>
+        <div id="driverAccountContent"></div>
+      </section>
+      <section id="driver-attendance" class="driver-view" hidden>
+        <div id="driverAttendanceContent"></div>
+      </section>
+      <section id="driver-issues" class="driver-view" hidden>
+        <div id="driverIssuesContent"></div>
+      </section>
+      <section id="driver-messages" class="driver-view" hidden>
+        <div id="driverMessagesContent"></div>
+      </section>
+      <section id="driver-notifications" class="driver-view" hidden>
+        <div id="driverNotificationsContent"></div>
+      </section>
+    </section>
+  </main>
+  <div id="driverToast" class="driver-toast" role="status" aria-live="polite"></div>
+  <script src="sync.js"></script>
+  <script src="cloud-config.js"></script>
+  <script src="driver-portal.js"></script>
+</body>
+</html>
