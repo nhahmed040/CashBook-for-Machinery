@@ -273,7 +273,7 @@
       return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
     }
     function driverDataUpdate(driverId, collection, id, record) {
-      var allowed = ['trips','attendance','issues','disputes','acknowledgements','messageReplies'];
+      var allowed = ['trips','attendance','issues','collections','disputes','acknowledgements','messageReplies'];
       if (allowed.indexOf(collection) < 0 || !driverId || !id) return Promise.reject(CloudError('invalid-driver-record'));
       return db('PATCH', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
     }
