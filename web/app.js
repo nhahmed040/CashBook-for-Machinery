@@ -2459,7 +2459,8 @@
     var action = item.getAttribute('data-top-action');
     $('topMenu').hidden = true;
     $('moreMenuBtn').setAttribute('aria-expanded', 'false');
-    if (action === 'settings') showView('settings');
+    if (action === 'driver') window.location.href = 'driver.html';
+    else if (action === 'settings') showView('settings');
     else if (action === 'backup') { showView('settings'); $('backupBtn').click(); }
     else if (action === 'restore') { showView('settings'); $('restoreBtn').click(); }
     else if (action === 'about') openModal('aboutModal');
