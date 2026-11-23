@@ -2929,6 +2929,8 @@
       now: function () { return Date.now(); },
       defaults: window.CB_CLOUD_DEFAULTS || {}
     });
+    window.CBGetFirebaseIdToken = function () { return cloud.token(); };
+    window.CBGetFirebaseConfig = function () { return cloud.cfg(); };
     var info = {};            // online book id -> { meta, members } from the last sync
     var invite = '';          // last invite text shown
     var busy = false, again = false, timer = 0, advanced = false;
