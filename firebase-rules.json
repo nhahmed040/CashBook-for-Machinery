@@ -43,7 +43,10 @@
       "$uid": {
         ".read": "auth != null && (auth.token.owner === true || auth.uid === $uid)",
         ".write": "auth != null && auth.token.owner === true"
-      }
+      },
+      ".indexOn": [
+        "driverId"
+      ]
     },
     "driverData": {
       "$driverId": {
