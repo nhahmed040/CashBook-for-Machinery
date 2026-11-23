@@ -2,6 +2,16 @@
 
 This plan is the working specification for the approved Stage 0–6 improvement programme. Work is performed on `feature/complete-owner-driver-workflow`; `main` is kept unchanged until the branch is tested and reviewed.
 
+## Implementation status (2026-11-23)
+
+- **Stage 0 — baseline safeguards:** merged to `main`. Six automated regression tests cover default state, existing book/entry identity, legacy migration, totals, CSV safety, and settings sanitization. The APK workflow runs these tests before Gradle.
+- **Stage 1 — owner navigation:** implemented on the feature branch. Five main areas route into the existing Machinery groups. Finance → CashBooks reuses the existing Entries screen and storage; Settings is under More. Android Back returns from CashBooks to Finance.
+- **Stage 2 — financial accountability:** existing payment-to-driver custody calculation retained; Daily Closing now suggests calculated driver-held cash. Trips and collections can be recorded without a named customer, while named customer allocation remains supported. Driver reassignment is blocked until cash/advance balances, reimbursements, pending/disputed expenses, and pending closings are cleared.
+- **Stage 3 — driver profiles:** owner driver cards now open the approved Overview / Operations / Finance & Administration profile tabs. Licence expiry dates are captured and expiry warnings are displayed.
+- **Stage 5 — operational records (partial):** backward-compatible attendance, issue, message, and document collections are added to the machinery backup bridge. Owner attendance records support reasoned, audited corrections. Issue records support assignment and resolution; a resolved repair cost is posted once to the machine CashBook.
+- **Not complete:** driver authentication/permissions, driver self-service, messaging/notifications, document management beyond licence expiry, and full reports/audit review remain in progress. The app currently has device-local machinery data and Firebase client authentication for cloud features, but owner-managed creation/suspension of separate driver accounts requires a trusted Firebase Admin backend (for example, a secured Cloud Function). Client-side code must not contain service-account credentials or pretend local permission toggles are secure.
+
+
 ## Non-negotiable preservation rules
 
 - Preserve existing CashBook, business, project, contact, machinery, driver, trip, payment, expense, maintenance, payroll, backup, restore, language, calendar, print, and Android WebView behavior.
