@@ -27,6 +27,8 @@ function validateInput(data) {
 exports.createDriverAccount=onCall(async(request)=>{
   requireOwner(request);
   const input=validateInput(request.data||{}),auth=getAuth(),root=database();
+  const duplicate=await root.child('driverAccounts').orderByChild('driverId').equalTo(input.driverId).once('value');
+  if(duplicate.exists()) throw new HttpsError('already-exists','A login account is already linked to this driver.');
   let user;
   try {
     user=await auth.createUser({email:input.email,password:input.password,displayName:input.displayName,disabled:false});
