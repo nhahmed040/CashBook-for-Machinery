@@ -303,6 +303,40 @@
     }
   };
 
+  // Driver account rules mirror firebase-rules.json. Admin credentials are never exposed to clients.
+  RULES.rules.driverAccounts = {
+    '.indexOn': ['driverId'],
+    '$uid': {
+      '.read': 'auth != null && (auth.token.owner === true || auth.uid === $uid)',
+      '.write': 'auth != null && auth.token.owner === true'
+    }
+  };
+  RULES.rules.driverData = {
+    '$driverId': {
+      '.read': "auth != null && (auth.token.owner === true || (auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true))",
+      '.write': 'auth != null && auth.token.owner === true',
+      'trips': { '$tripId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordTrips === true && auth.token.tripMode !== 'disabled' && newData.child('driverId').val() === $driverId && newData.child('approvalStatus').val() === (auth.token.tripMode === 'auto-approval' ? 'approved' : 'pending') && !data.exists()"
+      } },
+      'attendance': { '$recordId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.recordAttendance === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } },
+      'issues': { '$issueId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportIssues === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } },
+      'disputes': { '$disputeId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportDisputes === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } },
+      'acknowledgements': { '$ackId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.confirmNotifications === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } },
+      'messageReplies': { '$replyId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.replyMessages === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } }
+    }
+  };
+
+
   return {
     sig: sig, pack: pack, merge: merge, FIELDS: FIELDS, RULES: RULES,
     createCloud: createCloud, cleanDbUrl: cleanDbUrl, newBookId: newBookId, newInviteCode: newInviteCode, parseShare: parseShare
