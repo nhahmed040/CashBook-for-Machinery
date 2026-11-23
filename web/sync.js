@@ -268,7 +268,7 @@
     function driverAccountGet(uid) { return db('GET', 'driverAccounts/' + encodeURIComponent(uid)); }
     function driverDataGet(driverId) { return db('GET', 'driverData/' + encodeURIComponent(driverId)); }
     function driverDataCreate(driverId, collection, id, record) {
-      var allowed = ['trips','attendance','issues','disputes','acknowledgements','messageReplies'];
+      var allowed = ['trips','attendance','issues','disputes','acknowledgements','messageReplies','messages','notifications','messageReads'];
       if (allowed.indexOf(collection) < 0 || !driverId || !id) return Promise.reject(CloudError('invalid-driver-record'));
       return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
     }
@@ -345,6 +345,9 @@
         '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.reportDisputes === true && newData.child('driverId').val() === $driverId && !data.exists()"
       } },
       'acknowledgements': { '$ackId': {
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.confirmNotifications === true && newData.child('driverId').val() === $driverId && !data.exists()"
+      } },
+      'messageReads': { '$readId': {
         '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.confirmNotifications === true && newData.child('driverId').val() === $driverId && !data.exists()"
       } },
       'messageReplies': { '$replyId': {
