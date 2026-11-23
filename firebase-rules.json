@@ -73,7 +73,12 @@
             ".write": "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.confirmNotifications === true && !data.exists()"
           }
         },
-        ".write": "auth != null && auth.token.owner === true"
+        ".write": "auth != null && auth.token.owner === true",
+        "messageReplies": {
+          "$replyId": {
+            ".write": "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.replyMessages === true && !data.exists()"
+          }
+        }
       }
     }
   }
