@@ -265,6 +265,13 @@
     function setRole(id, uid, role) { return db('PUT', 'books/' + id + '/members/' + uid + '/role', role === 'edit' ? 'edit' : 'view'); }
     function removeMember(id, uid) { return db('DELETE', 'books/' + id + '/members/' + uid); }
     function deleteBook(id) { return db('DELETE', 'invites/' + id).then(function () { return db('DELETE', 'books/' + id); }); }   // invites first: their rule needs the book's owner
+    function driverAccountGet(uid) { return db('GET', 'driverAccounts/' + encodeURIComponent(uid)); }
+    function driverDataGet(driverId) { return db('GET', 'driverData/' + encodeURIComponent(driverId)); }
+    function driverDataCreate(driverId, collection, id, record) {
+      var allowed = ['trips','attendance','issues','disputes','acknowledgements','messageReplies'];
+      if (allowed.indexOf(collection) < 0 || !driverId || !id) return Promise.reject(CloudError('invalid-driver-record'));
+      return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
+    }
 
     return {
       cfg: cfg, patchCfg: patchCfg, token: token, signUp: signUp, signIn: signIn, signInGoogle: signInGoogle, signOut: signOut, signedIn: signedIn,
@@ -272,7 +279,8 @@
       createBook: createBook, setBookName: setBookName, profilePut: profilePut, profileGet: profileGet,
       indexPut: indexPut, indexGet: indexGet, indexDelete: indexDelete, getBook: getBook, pushEntries: pushEntries,
       createInvite: createInvite, revokeInvites: revokeInvites, join: join,
-      setRole: setRole, removeMember: removeMember, deleteBook: deleteBook
+      setRole: setRole, removeMember: removeMember, deleteBook: deleteBook,
+      driverAccountGet: driverAccountGet, driverDataGet: driverDataGet, driverDataCreate: driverDataCreate
     };
   }
 
