@@ -1892,9 +1892,11 @@
 
   var VIEWS = ['entries', 'machinery', 'reports', 'settings'];
   var mainSection = 'dashboard';
+  var cashBooksReturn = false;
   function showView(name) {
     var sectionGroups = { dashboard: 'overview', operations: 'operations', finance: 'finance', fleet: 'fleet', more: 'more' };
     if (sectionGroups[name]) {
+      cashBooksReturn = false;
       mainSection = name;
       if (window.CBMachineryNavigate) window.CBMachineryNavigate(sectionGroups[name]);
       name = 'machinery';
@@ -1913,7 +1915,7 @@
     applyEntriesScreen();
     window.scrollTo(0, 0);
   }
-  window.CBOpenCashBooks = function () { showView('entries'); };
+  window.CBOpenCashBooks = function () { cashBooksReturn = true; showView('entries'); };
   window.CBOpenSettings = function () { showView('settings'); };
 
   // Android Back navigation: close transient UI before leaving a screen.
@@ -1966,6 +1968,11 @@
       return true;
     }
 
+    if (ui.view === 'entries' && cashBooksReturn) {
+      cashBooksReturn = false;
+      showView('finance');
+      return true;
+    }
     if (ui.bookOpen) {
       ui.bookOpen = false;
       renderAll();
