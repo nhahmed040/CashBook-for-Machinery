@@ -50,6 +50,7 @@ exports.updateDriverAccount=onCall(async(request)=>{
   const permissions=data.permissions==null?cleanPermissions(current.permissions):cleanPermissions(data.permissions);
   const tripMode=['disabled','owner-approval','auto-approval'].includes(data.tripMode)?data.tripMode:(current.tripMode||'disabled');
   await getAuth().updateUser(uid,{disabled:!active});
+  if(!active) await getAuth().revokeRefreshTokens(uid);
   await getAuth().setCustomUserClaims(uid,{role:'driver',driverId:current.driverId,active,permissions,tripMode});
   await ref.update({active,permissions,tripMode,updatedAt:Date.now()});
   return {uid,driverId:current.driverId,active,permissions,tripMode};
