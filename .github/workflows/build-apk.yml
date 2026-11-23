@@ -37,6 +37,9 @@ jobs:
       
       - name: Check Firebase driver backend syntax
         run: node --check functions/index.js && node --check scripts/set-owner-claim.js
+      
+      - name: Validate Firebase configuration JSON
+        run: node -e "for (const p of ['firebase.json','firebase-rules.json','functions/package.json']) JSON.parse(require('fs').readFileSync(p,'utf8'))"
 
       - name: Run CashBook data integrity tests
         run: node --test tests/*.test.js
