@@ -272,6 +272,15 @@
       if (allowed.indexOf(collection) < 0 || !driverId || !id) return Promise.reject(CloudError('invalid-driver-record'));
       return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
     }
+    function driverDataUpdate(driverId, collection, id, record) {
+      var allowed = ['trips','attendance','issues','disputes','acknowledgements','messageReplies'];
+      if (allowed.indexOf(collection) < 0 || !driverId || !id) return Promise.reject(CloudError('invalid-driver-record'));
+      return db('PATCH', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
+    }
+    function driverDataSet(driverId, key, value) {
+      if (!driverId || ['summary','messages','notifications'].indexOf(key) < 0) return Promise.reject(CloudError('invalid-driver-record'));
+      return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + key, value);
+    }
 
     return {
       cfg: cfg, patchCfg: patchCfg, token: token, signUp: signUp, signIn: signIn, signInGoogle: signInGoogle, signOut: signOut, signedIn: signedIn,
@@ -280,7 +289,7 @@
       indexPut: indexPut, indexGet: indexGet, indexDelete: indexDelete, getBook: getBook, pushEntries: pushEntries,
       createInvite: createInvite, revokeInvites: revokeInvites, join: join,
       setRole: setRole, removeMember: removeMember, deleteBook: deleteBook,
-      driverAccountGet: driverAccountGet, driverDataGet: driverDataGet, driverDataCreate: driverDataCreate
+      driverAccountGet: driverAccountGet, driverDataGet: driverDataGet, driverDataCreate: driverDataCreate, driverDataUpdate: driverDataUpdate, driverDataSet: driverDataSet
     };
   }
 
