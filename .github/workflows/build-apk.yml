@@ -35,6 +35,9 @@ jobs:
       - name: Check JavaScript syntax
         run: for f in web/*.js; do node --check "$f"; done
 
+      - name: Run CashBook data integrity tests
+        run: node --test tests/*.test.js
+
       - name: Decode permanent release keystore
         if: env.HAS_SIGNING_KEY == 'true'
         env:
