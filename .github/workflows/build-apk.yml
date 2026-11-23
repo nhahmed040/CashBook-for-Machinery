@@ -35,8 +35,11 @@ jobs:
       - name: Check JavaScript syntax
         run: for f in web/*.js; do node --check "$f"; done
       
+      - name: Install Firebase backend dependencies
+        run: npm install --prefix functions --ignore-scripts --no-audit --no-fund
+
       - name: Check Firebase driver backend syntax
-        run: node --check functions/index.js && node --check scripts/set-owner-claim.js
+        run: node --check functions/index.js && node --check scripts/set-owner-claim.js && node -e "const f=require('./functions'); if (!f.createDriverAccount || !f.updateDriverAccount) process.exit(1)"
       
       - name: Validate Firebase configuration JSON
         run: node -e "for (const p of ['firebase.json','firebase-rules.json','functions/package.json']) JSON.parse(require('fs').readFileSync(p,'utf8'))"
