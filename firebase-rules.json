@@ -38,6 +38,42 @@
           }
         }
       }
+    },
+    "driverAccounts": {
+      "$uid": {
+        ".read": "auth != null && (auth.token.owner === true || auth.uid === $uid)",
+        ".write": "auth != null && auth.token.owner === true"
+      }
+    },
+    "driverData": {
+      "$driverId": {
+        ".read": "auth != null && (auth.token.owner === true || (auth.token.role === 'driver' && auth.token.active === true && auth.token.driverId === $driverId))",
+        "trips": {
+          "$tripId": {
+            ".write": "auth != null && auth.token.role === 'driver' && auth.token.active === true && auth.token.driverId === $driverId && auth.token.permissions.recordTrips === true && !data.exists()"
+          }
+        },
+        "attendance": {
+          "$recordId": {
+            ".write": "auth != null && auth.token.role === 'driver' && auth.token.active === true && auth.token.driverId === $driverId && auth.token.permissions.recordAttendance === true && !data.exists()"
+          }
+        },
+        "issues": {
+          "$issueId": {
+            ".write": "auth != null && auth.token.role === 'driver' && auth.token.active === true && auth.token.driverId === $driverId && auth.token.permissions.reportIssues === true && !data.exists()"
+          }
+        },
+        "disputes": {
+          "$disputeId": {
+            ".write": "auth != null && auth.token.role === 'driver' && auth.token.active === true && auth.token.driverId === $driverId && auth.token.permissions.reportDisputes === true && !data.exists()"
+          }
+        },
+        "acknowledgements": {
+          "$ackId": {
+            ".write": "auth != null && auth.token.role === 'driver' && auth.token.active === true && auth.token.driverId === $driverId && auth.token.permissions.confirmNotifications === true && !data.exists()"
+          }
+        }
+      }
     }
   }
 }
