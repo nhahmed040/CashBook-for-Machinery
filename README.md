@@ -171,9 +171,10 @@ Notes: the free Firebase plan is plenty for cash books. Anyone with your databas
 The owner-managed driver login backend is scaffolded in `functions/` using Firebase Authentication and the Admin SDK. Driver accounts are created, permission claims are assigned, and accounts can be suspended/reactivated only by a caller with the `owner: true` custom claim. Realtime Database rules restrict driver reads to their own account/data and permit only explicitly authorized create-only driver actions.
 
 Before deployment:
-1. Configure Firebase Realtime Database and set `FIREBASE_DATABASE_URL` for Functions.
-2. Create the owner Firebase Authentication account and install backend dependencies with `npm install --prefix functions`.
-3. In a trusted admin environment with a service-account credential (never in the app), run `OWNER_EMAIL=owner@example.com node scripts/set-owner-claim.js`.
-4. Deploy from the repository root with Firebase CLI: `firebase deploy --only functions,database`.
+1. Select the correct Firebase project with `firebase use --add` and configure its Realtime Database.
+2. Create `functions/.env.<project-id>` locally with `FIREBASE_DATABASE_URL=https://<your-database-host>`; this file is ignored by Git. Never commit credentials or private environment files.
+3. Create the owner Firebase Authentication account and install backend dependencies with `npm install --prefix functions`.
+4. In a trusted admin environment with a service-account credential (never in the app), run `OWNER_EMAIL=owner@example.com node scripts/set-owner-claim.js`.
+5. Deploy from the repository root with Firebase CLI: `firebase deploy --only functions,database`.
 
 The Android/web client does not contain Admin credentials. Driver sign-in and remote permission enforcement become active only after this backend is deployed and the driver client is connected to it.
