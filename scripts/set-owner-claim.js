@@ -1,8 +1,8 @@
 'use strict';
 // Run only in a trusted admin environment with GOOGLE_APPLICATION_CREDENTIALS set.
 // Never copy a service-account key into the Android app or web assets.
-const {initializeApp,applicationDefault}=require('firebase-admin/app');
-const {getAuth}=require('firebase-admin/auth');
+const {initializeApp,applicationDefault}=require('../functions/node_modules/firebase-admin/app');
+const {getAuth}=require('../functions/node_modules/firebase-admin/auth');
 const email=String(process.env.OWNER_EMAIL||'').trim().toLowerCase();
 if(!email){process.stderr.write('Set OWNER_EMAIL to the existing owner Firebase Auth email.\n');process.exit(2);}
 initializeApp({credential:applicationDefault()});
