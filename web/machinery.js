@@ -307,7 +307,7 @@ render();
     importData: function (raw) {
       if (!this.validate(raw)) return false;
       var next = {};
-      ['machines','operations','expenses','maintenance','driverLedger','dailyClosings','auditLog','trips','customers','drivers','payments'].forEach(function (key) {
+      ['machines','operations','expenses','maintenance','driverLedger','dailyClosings','attendance','issues','messages','documents','auditLog','trips','customers','drivers','payments'].forEach(function (key) {
         next[key] = Array.isArray(raw[key]) ? raw[key] : [];
       });
       try {
