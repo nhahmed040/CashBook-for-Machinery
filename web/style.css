@@ -769,3 +769,11 @@ input:focus, select:focus, textarea:focus {
 .settings-fleet-rules h2{margin:0 0 8px}
 .settings-fleet-rules ul{padding-left:20px;margin:10px 0;display:grid;gap:8px}
 .settings-fleet-rules li{font-size:.82rem;line-height:1.45;color:var(--text)}
+
+
+/* Owner driver profile tabs */
+.mach-profile-tabs { display:flex; gap:6px; overflow-x:auto; padding:8px 0 2px; }
+.mach-profile-tabs button { flex:1 0 auto; min-width:0; padding:9px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); font-size:.82rem; font-weight:650; }
+.mach-profile-tabs button.on { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+.mach-warning-text { color:var(--out); }
+.mach-success-text { color:var(--in); }
