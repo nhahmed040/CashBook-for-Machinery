@@ -259,6 +259,7 @@ state.trips.forEach(function(t){if(!t.driverId&&t.driverName){var ld=state.drive
 state.drivers.forEach(function(d){var owner=state.machines.find(function(m){return m.driverId===d.id;});if(owner&&d.machineId!==owner.id){d.machineId=owner.id;migrated=true;}});
 state.expenses.forEach(function(x){var m=machine(x.machineId);if(m){var id=machineBook(m);if(id&&!x.bookId){x.bookId=id;postCash(m,'expense',x.id,{type:'out',amount:x.amount,date:x.date,category:x.type,party:'',note:x.note||''});migrated=true;}}});
 if(migrated)save();
+window.CBMachineryNavigate=function(group){var defaults={overview:'dashboard',operations:'trips',finance:'driverAccounts',fleet:'machines',more:'fuel'};if(['overview','operations','finance','fleet','more'].indexOf(group)<0)return;activeGroup=group;activeTab=defaults[group];editing=null;render();};
 document.querySelectorAll('.tabs button[data-view="machinery"]').forEach(function(b){b.addEventListener('click',render);});
 document.addEventListener('visibilitychange',function(){if(!document.hidden)render();});
 render();
