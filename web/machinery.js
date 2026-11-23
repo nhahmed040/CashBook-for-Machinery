@@ -6,7 +6,7 @@ var uid=function(){return 'm'+Date.now().toString(36)+Math.random().toString(36)
 var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
 var money=function(n){return 'ETB '+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});};
 var state=load(), activeTab='dashboard', activeGroup='overview', editing=null, selectedMachineId='', selectedCustomerId='', selectedDriverId='', selectedDriverTab='overview';
-function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||'{}');return {machines:Array.isArray(x.machines)?x.machines:[],operations:Array.isArray(x.operations)?x.operations:[],expenses:Array.isArray(x.expenses)?x.expenses:[],trips:Array.isArray(x.trips)?x.trips:[],customers:Array.isArray(x.customers)?x.customers:[],drivers:Array.isArray(x.drivers)?x.drivers:[],payments:Array.isArray(x.payments)?x.payments:[],maintenance:Array.isArray(x.maintenance)?x.maintenance:[],driverLedger:Array.isArray(x.driverLedger)?x.driverLedger:[],dailyClosings:Array.isArray(x.dailyClosings)?x.dailyClosings:[],auditLog:Array.isArray(x.auditLog)?x.auditLog:[]};}catch(e){return {machines:[],operations:[],expenses:[],trips:[],customers:[],drivers:[],payments:[],maintenance:[],driverLedger:[],dailyClosings:[],auditLog:[]};}}
+function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||'{}');return {machines:Array.isArray(x.machines)?x.machines:[],operations:Array.isArray(x.operations)?x.operations:[],expenses:Array.isArray(x.expenses)?x.expenses:[],trips:Array.isArray(x.trips)?x.trips:[],customers:Array.isArray(x.customers)?x.customers:[],drivers:Array.isArray(x.drivers)?x.drivers:[],payments:Array.isArray(x.payments)?x.payments:[],maintenance:Array.isArray(x.maintenance)?x.maintenance:[],driverLedger:Array.isArray(x.driverLedger)?x.driverLedger:[],dailyClosings:Array.isArray(x.dailyClosings)?x.dailyClosings:[],attendance:Array.isArray(x.attendance)?x.attendance:[],issues:Array.isArray(x.issues)?x.issues:[],messages:Array.isArray(x.messages)?x.messages:[],documents:Array.isArray(x.documents)?x.documents:[],auditLog:Array.isArray(x.auditLog)?x.auditLog:[]};}catch(e){return {machines:[],operations:[],expenses:[],trips:[],customers:[],drivers:[],payments:[],maintenance:[],driverLedger:[],dailyClosings:[],attendance:[],issues:[],messages:[],documents:[],auditLog:[]};}}
 function save(){try{var serialized=JSON.stringify(state);localStorage.setItem(KEY,serialized);if(localStorage.getItem(KEY)!==serialized)throw new Error('Save verification failed');return true;}catch(e){alert('Unable to safely save machinery records. Phone storage may be full. Export a full backup and free storage before continuing.');return false;}}
 function total(a){return a.reduce(function(s,x){return s+(Number(x.amount)||0);},0);}
 function auditSnapshot(x){var keys=['name','type','machineId','date','amount','quantity','rate','basis','material','customerId','customerName','status','serviceType','meterType','meterReading','supplier','method','reference','allocations','driverId','plate','make','capacity','ownership','rateMode','destination','origin','ticket','description','nextServiceDate','nextServiceMeter','driverName','period','daysWorked','baseSalary','dailyIncentive','incentiveAmount','advance','deductions','netAmount','component'];var o={};keys.forEach(function(k){if(x&&x[k]!==undefined)o[k]=x[k];});return o;}
@@ -288,7 +288,11 @@ render();
         maintenance: state.maintenance,
         driverLedger: state.driverLedger,
         dailyClosings: state.dailyClosings,
-        auditLog: state.auditLog,
+        attendance: state.attendance,
+        issues: state.issues,
+        messages: state.messages,
+        documents: state.documents,
+        auditLog: state.auditLog, 
         trips: state.trips,
         customers: state.customers,
         drivers: state.drivers,
@@ -297,7 +301,7 @@ render();
     },
     validate: function (raw) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
-      var keys = ['machines','operations','expenses','maintenance','driverLedger','dailyClosings','auditLog','trips','customers','drivers','payments'];
+      var keys = ['machines','operations','expenses','maintenance','driverLedger','dailyClosings','attendance','issues','messages','documents','auditLog','trips','customers','drivers','payments'];
       return keys.every(function (key) { return raw[key] == null || Array.isArray(raw[key]); });
     },
     importData: function (raw) {
