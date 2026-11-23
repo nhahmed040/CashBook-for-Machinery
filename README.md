@@ -166,6 +166,10 @@ Notes: the free Firebase plan is plenty for cash books. Anyone with your databas
 "Continue with Google" appears on the sign-in screen in the Android app. It needs, in Firebase: Authentication → Sign-in method → **Google** enabled, and an **Android app** registered with package `com.nhahmed.cashbook` and the SHA-1 of `private signing key (not included)` (`keytool -list -v -keystore private signing key (not included) -alias cashbook -storepass cashbook-sideload`). The Web client ID of the Google provider is set in `web/cloud-config.js`. A Google account with the same email as an existing email/password account is the same account in CashBook. Phone (SMS) two-factor is not supported yet.
 
 
+## Driver Portal
+
+The owner app opens `web/driver.html` from the top-right overflow menu. Drivers sign in with owner-created Firebase accounts. The portal exposes Home, Trips & Loads, My Account, Attendance, Report Issues, Messages, and Notifications. Driver submissions are stored under their driver-specific Realtime Database path and imported by the owner's **Sync driver portal** action. Pending trips require owner approval; cash collections are imported as machine CashBook receipts and driver-held cash. The portal uses a separate local Firebase session key so a driver sign-in does not overwrite the owner's cloud session on the same device.
+
 ## Secure driver account backend (deployment required)
 
 The owner-managed driver login backend is scaffolded in `functions/` using Firebase Authentication and the Admin SDK. Driver accounts are created, permission claims are assigned, and accounts can be suspended/reactivated only by a caller with the `owner: true` custom claim. Realtime Database rules restrict driver reads to their own account/data and permit only explicitly authorized create-only driver actions.
