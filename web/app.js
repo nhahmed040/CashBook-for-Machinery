@@ -1891,17 +1891,29 @@
   }
 
   var VIEWS = ['entries', 'machinery', 'reports', 'settings'];
+  var mainSection = 'dashboard';
   function showView(name) {
+    var sectionGroups = { dashboard: 'overview', operations: 'operations', finance: 'finance', fleet: 'fleet', more: 'more' };
+    if (sectionGroups[name]) {
+      mainSection = name;
+      if (window.CBMachineryNavigate) window.CBMachineryNavigate(sectionGroups[name]);
+      name = 'machinery';
+    } else if (name === 'entries') {
+      mainSection = 'finance';
+    } else if (name === 'settings' || name === 'reports') {
+      mainSection = 'more';
+    }
     ui.view = name;
     VIEWS.forEach(function (v) { $('view-' + v).hidden = v !== name; });
     Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) {
-      b.classList.toggle('active', b.getAttribute('data-view') === name);
+      b.classList.toggle('active', b.getAttribute('data-view') === mainSection);
     });
     document.body.classList.remove('view-entries', 'view-machinery', 'view-reports', 'view-settings');
     document.body.classList.add('view-' + name);
     applyEntriesScreen();
     window.scrollTo(0, 0);
   }
+  window.CBOpenCashBooks = function () { showView('entries'); };
 
   // Android Back navigation: close transient UI before leaving a screen.
   window.__handleAndroidBack = function () {
@@ -2421,10 +2433,8 @@
     b.addEventListener('click', function () {
       var v = b.getAttribute('data-view');
       buzz();
-      if (v === 'entries' && ui.view === 'entries') ui.bookOpen = false;   // tapping Entries again goes back to the list of books
       showView(v);
       if (v === 'reports') renderReports();
-
     });
   });
 
