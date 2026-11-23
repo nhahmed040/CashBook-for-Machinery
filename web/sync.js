@@ -267,7 +267,7 @@
     function deleteBook(id) { return db('DELETE', 'invites/' + id).then(function () { return db('DELETE', 'books/' + id); }); }   // invites first: their rule needs the book's owner
 
     return {
-      cfg: cfg, patchCfg: patchCfg, signUp: signUp, signIn: signIn, signInGoogle: signInGoogle, signOut: signOut, signedIn: signedIn,
+      cfg: cfg, patchCfg: patchCfg, token: token, signUp: signUp, signIn: signIn, signInGoogle: signInGoogle, signOut: signOut, signedIn: signedIn,
       backupPut: backupPut, backupGet: backupGet,
       createBook: createBook, setBookName: setBookName, profilePut: profilePut, profileGet: profileGet,
       indexPut: indexPut, indexGet: indexGet, indexDelete: indexDelete, getBook: getBook, pushEntries: pushEntries,
