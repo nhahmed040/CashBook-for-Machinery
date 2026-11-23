@@ -10,3 +10,4 @@ local.properties
 .firebase/
 functions/node_modules/
 functions/.env*
+!functions/.env.example
