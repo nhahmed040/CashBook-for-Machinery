@@ -1914,6 +1914,7 @@
     window.scrollTo(0, 0);
   }
   window.CBOpenCashBooks = function () { showView('entries'); };
+  window.CBOpenSettings = function () { showView('settings'); };
 
   // Android Back navigation: close transient UI before leaving a screen.
   window.__handleAndroidBack = function () {
