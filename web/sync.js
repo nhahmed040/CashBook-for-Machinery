@@ -351,7 +351,7 @@
         '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.confirmNotifications === true && newData.child('driverId').val() === $driverId && !data.exists()"
       } },
       'messageReads': { '$readId': {
-        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && newData.child('driverId').val() === $driverId && !data.exists()"
+        '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && newData.child('driverId').val() === $driverId && newData.child('messageId').exists() && root.child('driverData/'+$driverId+'/messages/'+newData.child('messageId').val()+'/senderRole').val() === 'owner' && !data.exists()"
       } },
       'messageReplies': { '$replyId': {
         '.write': "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.replyMessages === true && newData.child('driverId').val() === $driverId && !data.exists()"

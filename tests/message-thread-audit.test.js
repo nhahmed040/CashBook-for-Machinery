@@ -5,6 +5,8 @@ const fs = require('node:fs');
 
 const owner = fs.readFileSync(require.resolve('../web/machinery.js'), 'utf8');
 const portal = fs.readFileSync(require.resolve('../web/driver-portal.js'), 'utf8');
+const sync = fs.readFileSync(require.resolve('../web/sync.js'), 'utf8');
+const rules = fs.readFileSync(require.resolve('../firebase-rules.json'), 'utf8');
 
 test('owner sync preserves every distinct driver reply instead of overwriting the previous reply', () => {
   assert.match(owner, /msg\.replies=Array\.isArray\(msg\.replies\)\?msg\.replies:\[\]/);
@@ -26,4 +28,15 @@ test('driver portal displays previously submitted replies under the matching own
 
 test('message reply audit snapshots retain the reply identity, text and timestamp', () => {
   assert.match(owner, /'messageId','reply','driverName','createdAt'/);
+});
+
+test('first message read receipt is audited once and owner history shows delivery and read state', () => {
+  assert.match(owner, /if\(msg&&!msg\.readAt\)\{msg\.readAt=r\.readAt\|\|r\.createdAt\|\|new Date\(\)\.toISOString\(\);logAudit\('Read','Driver message',msg,null\);\}/);
+  assert.match(owner, /'subject','direction','readAt','notificationSentStatus'/);
+  assert.match(owner, /Delivery: '\+\(x\.remoteId\|\|x\.notificationSentStatus\?'Delivered':'Pending'\)\+' · Read:/);
+});
+
+test('driver read receipts are limited to an existing owner-authored message', () => {
+  assert.match(sync, /newData\.child\('messageId'\)\.exists\(\).*messages\/.*senderRole/);
+  assert.match(rules, /newData\.child\('messageId'\)\.exists\(\).*messages\/.*senderRole/);
 });

@@ -84,7 +84,7 @@
         },
         "messageReads": {
           "$readId": {
-            ".write": "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && newData.child('driverId').val() === $driverId && !data.exists()"
+            ".write": "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && newData.child('driverId').val() === $driverId && newData.child('messageId').exists() && root.child('driverData/'+$driverId+'/messages/'+newData.child('messageId').val()+'/senderRole').val() === 'owner' && !data.exists()"
           }
         },
         "documents": {
