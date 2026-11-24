@@ -20,7 +20,7 @@ function refreshDriverData(showToast){
   account=a;$('driverName').textContent=account.displayName||'Driver';$('driverMachine').textContent=account.machineId?'Assigned machine ID: '+account.machineId:'No machine currently assigned';
   return cloud.driverDataGet(account.driverId);
  }).then(function(data){
-  if(!account||data===null)return false;
+  if(!account)return false;
   driverData=data||{};render();if(showToast)toast('Your account has been refreshed.');return true;
  }).catch(function(err){if(showToast)toast(err.message||'Refresh failed.',true);return false;}).then(function(result){refreshInProgress=false;return result;});
 }
