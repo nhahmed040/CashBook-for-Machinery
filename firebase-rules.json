@@ -94,7 +94,7 @@
         },
         "documents": {
           "$documentId": {
-            ".write": "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.manageDocuments === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
+            ".write": "auth != null && auth.token.role === 'driver' && auth.token.driverId === $driverId && root.child('driverAccounts/'+auth.uid+'/active').val() === true && auth.token.permissions.submitDocuments === true && newData.child('driverId').val() === $driverId && newData.child('machineId').val() === auth.token.machineId && !data.exists()"
           }
         }
       }
