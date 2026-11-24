@@ -39,8 +39,9 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
+          [[ "$PROJECT_ID" =~ ^[a-z0-9][a-z0-9-]{4,28}[a-z0-9]$ ]] || { echo "Enter a valid Firebase project ID."; exit 1; }
           test -n "$FIREBASE_SERVICE_ACCOUNT" || { echo "Missing FIREBASE_SERVICE_ACCOUNT repository secret."; exit 1; }
-          test -n "$FIREBASE_DATABASE_URL" || { echo "Missing FIREBASE_DATABASE_URL repository secret."; exit 1; }
+          case "$FIREBASE_DATABASE_URL" in https://*) ;; *) echo "FIREBASE_DATABASE_URL must be an HTTPS Realtime Database URL."; exit 1 ;; esac
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
           node -e "JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP + '/firebase-service-account.json', 'utf8'))"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
