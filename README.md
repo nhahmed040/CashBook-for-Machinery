@@ -182,3 +182,15 @@ Before deployment:
 5. Deploy from the repository root with Firebase CLI: `firebase deploy --only functions,database`.
 
 The Android/web client does not contain Admin credentials. Driver sign-in and remote permission enforcement become active only after this backend is deployed and the driver client is connected to it.
+
+### Deploying the driver backend with GitHub Actions
+
+The repository includes a manual **Deploy Firebase backend** workflow. It deploys the Realtime Database rules and Cloud Functions to the separate Firebase project you select, then grants the owner custom claim to the existing Authentication user you specify. It does not deploy automatically on every code change.
+
+Before running it, add these repository Actions secrets under **Settings → Secrets and variables → Actions**:
+
+- `FIREBASE_SERVICE_ACCOUNT`: the JSON key for a service account authorized to deploy this project's Realtime Database rules and Cloud Functions and administer Firebase Authentication.
+- `FIREBASE_DATABASE_URL`: the Realtime Database URL for this same project (for example, `https://PROJECT-default-rtdb.REGION.firebasedatabase.app`).
+
+Then open **Actions → Deploy Firebase backend → Run workflow**, enter the Firebase project ID and the existing owner's Authentication email, and run it. The workflow creates the ignored `functions/.env.<project-id>` file only on the temporary runner; credentials are not committed. After the owner claim is granted, the owner must sign out and sign back in to refresh the ID token. Do not reuse the original CashBook Firebase project or put service-account credentials in the Android app.
+
