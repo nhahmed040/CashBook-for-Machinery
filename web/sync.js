@@ -278,7 +278,7 @@
       return db('PATCH', 'driverData/' + encodeURIComponent(driverId) + '/' + collection + '/' + encodeURIComponent(id), record);
     }
     function driverDataSet(driverId, key, value) {
-      if (!driverId || ['summary','messages','notifications'].indexOf(key) < 0) return Promise.reject(CloudError('invalid-driver-record'));
+      if (!driverId || ['summary','transactions','messages','notifications'].indexOf(key) < 0) return Promise.reject(CloudError('invalid-driver-record'));
       return db('PUT', 'driverData/' + encodeURIComponent(driverId) + '/' + key, value);
     }
 
