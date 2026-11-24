@@ -5,7 +5,7 @@ const { getAuth } = require('firebase-admin/auth');
 const { getDatabase } = require('firebase-admin/database');
 initializeApp();
 
-const PERMISSION_KEYS = ['viewDashboard','recordTrips','viewBalance','viewHistory','confirmNotifications','reportDisputes','recordAttendance','reportIssues','replyMessages','recordCollections','submitDocuments'];
+const PERMISSION_KEYS = ['viewDashboard','recordTrips','viewBalance','viewHistory','confirmNotifications','reportDisputes','recordAttendance','reportIssues','replyMessages','recordCollections','submitDocuments','messageOtherDrivers'];
 function requireOwner(request) {
   if (!request.auth || request.auth.token.owner !== true) throw new HttpsError('permission-denied','Only the business owner can manage driver accounts.');
 }
@@ -57,4 +57,39 @@ exports.updateDriverAccount=onCall(async(request)=>{
   await getAuth().setCustomUserClaims(uid,{role:'driver',driverId:current.driverId,machineId,active,permissions,tripMode});
   await ref.update({active,permissions,tripMode,machineId,updatedAt:Date.now()});
   return {uid,driverId:current.driverId,machineId,active,permissions,tripMode};
+});
+
+
+// Driver-to-driver messaging is opt-in per account and relayed by trusted Functions.
+function requireMessagingDriver(request, account) {
+  if (!request.auth || request.auth.token.role !== 'driver' || !account ||
+      account.uid !== request.auth.uid || account.active !== true ||
+      account.driverId !== request.auth.token.driverId ||
+      !account.permissions || account.permissions.messageOtherDrivers !== true) {
+    throw new HttpsError('permission-denied','The owner has not enabled driver-to-driver messaging for this account.');
+  }
+}
+exports.listDriverContacts=onCall(async(request)=>{
+  if(!request.auth || request.auth.token.role!=='driver') throw new HttpsError('permission-denied','Driver sign-in is required.');
+  const root=database(),snap=await root.child('driverAccounts/'+request.auth.uid).once('value'),sender=snap.val();
+  requireMessagingDriver(request,sender);
+  const all=await root.child('driverAccounts').once('value'),contacts=[];
+  all.forEach((child)=>{const a=child.val()||{};if(a.driverId!==sender.driverId&&a.active===true&&a.permissions&&a.permissions.messageOtherDrivers===true)contacts.push({driverId:a.driverId,displayName:a.displayName||'Driver',machineId:a.machineId||''});});
+  contacts.sort((a,b)=>a.displayName.localeCompare(b.displayName));
+  return {contacts};
+});
+exports.sendDriverMessage=onCall(async(request)=>{
+  if(!request.auth || request.auth.token.role!=='driver') throw new HttpsError('permission-denied','Driver sign-in is required.');
+  const data=request.data||{},recipientId=String(data.recipientDriverId||'').trim(),subject=String(data.subject||'').trim().slice(0,80)||'Driver message',message=String(data.message||'').trim();
+  if(!recipientId||message.length<1||message.length>2000)throw new HttpsError('invalid-argument','Choose a driver and enter a message of up to 2,000 characters.');
+  const root=database(),senderSnap=await root.child('driverAccounts/'+request.auth.uid).once('value'),sender=senderSnap.val();
+  requireMessagingDriver(request,sender);
+  if(recipientId===sender.driverId)throw new HttpsError('invalid-argument','Choose another driver.');
+  const matches=await root.child('driverAccounts').orderByChild('driverId').equalTo(recipientId).once('value');
+  let recipient=null;matches.forEach((child)=>{const a=child.val()||{};if(a.active===true&&a.permissions&&a.permissions.messageOtherDrivers===true)recipient=a;});
+  if(!recipient)throw new HttpsError('failed-precondition','The selected driver is inactive or the owner has not enabled messaging for that account.');
+  const messageId=root.child('driverData/'+sender.driverId+'/messages').push().key,createdAt=new Date().toISOString(),threadId=String(data.threadId||messageId).slice(0,100);
+  const common={id:messageId,threadId,subject,message,senderRole:'driver',senderDriverId:sender.driverId,recipientDriverId:recipient.driverId,senderName:sender.displayName||'Driver',recipientName:recipient.displayName||'Driver',createdAt,date:createdAt.slice(0,10)};
+  await Promise.all([root.child('driverData/'+sender.driverId+'/messages/'+messageId).set({...common,direction:'outgoing'}),root.child('driverData/'+recipient.driverId+'/messages/'+messageId).set({...common,direction:'incoming'})]);
+  return {messageId,threadId,recipientName:recipient.displayName||'Driver',createdAt};
 });
