@@ -98,3 +98,11 @@ test('driver report metrics separate approved work, custody movements and owner 
   assert.equal(m.attendance,1);
   assert.equal(m.issues,1);
 });
+
+test('driver statement contains only the selected driver’s collection and ledger rows',()=>{
+ const payments=[{id:'p1',collectorDriverId:'d1',machineId:'m1',customerName:'Customer A',amount:300,date:'2026-11-02'},{id:'p2',collectorDriverId:'d2',machineId:'m2',amount:900,date:'2026-11-03'}];
+ const ledger=[{id:'l1',driverId:'d1',machineId:'m1',type:'advance',amount:500,date:'2026-11-01',status:'approved'},{id:'l2',driverId:'d1',machineId:'m1',type:'expense-request',amount:75,date:'2026-11-04',status:'pending'}];
+ const rows=A.statement(payments,ledger,'d1');
+ assert.deepEqual(rows.map(x=>x.id),['ledger:l2','payment:p1','ledger:l1']);
+ assert.equal(rows[0].status,'pending');assert.equal(rows[1].type,'Customer collection');assert.equal(rows.length,3);
+});
