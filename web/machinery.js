@@ -90,7 +90,7 @@ state.driverLedger.forEach(function(x){if(x.notificationRequired&&x.driverId)not
 state.dailyClosings.forEach(function(x){if(x.notificationRequired&&x.driverId)notificationRecords.push({source:'closing',record:x});});
 for(var ni=0;ni<notificationRecords.length;ni++){
 var source=notificationRecords[ni],nr=source.record,notifyDriver=driver(nr.driverId),notifyStatus=String(nr.status||'approved');
-if(!notifyDriver||!notifyDriver.authUid||nr.notificationSentStatus===notifyStatus)continue;
+if(nr.notificationSentStatus===notifyStatus)continue;if(!notifyDriver||!notifyDriver.authUid){counts.notificationsPending++;continue;}
 if(!window.CBDriverDataCreate){counts.notificationsPending++;continue;}
 var notifyId='driver-record-'+source.source+'-'+String(nr.id).replace(/[^a-zA-Z0-9_-]/g,'-')+'-'+notifyStatus;
 var typeLabels={advance:'Cash advance',handover:'Cash handover', 'advance-return':'Unused advance returned','expense-held':'Machine expense from held cash','personal-expense':'Driver-paid expense / reimbursement','company-expense':'Company-paid machine expense','expense-request':'Expense request','reimbursement':'Reimbursement'};
