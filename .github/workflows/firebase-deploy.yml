@@ -1,0 +1,68 @@
+name: Deploy Firebase backend
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: Firebase project ID for this app's separate Firebase project
+        required: true
+        type: string
+      owner_email:
+        description: Existing Firebase Authentication email that should receive the owner custom claim
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-deploy-${{ inputs.project_id }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PROJECT_ID: ${{ inputs.project_id }}
+      FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configure service account
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          [[ "$PROJECT_ID" =~ ^[a-z0-9][a-z0-9-]{4,28}[a-z0-9]$ ]] || { echo "Enter a valid Firebase project ID."; exit 1; }
+          test -n "$FIREBASE_SERVICE_ACCOUNT" || { echo "Missing FIREBASE_SERVICE_ACCOUNT repository secret."; exit 1; }
+          case "$FIREBASE_DATABASE_URL" in https://*) ;; *) echo "FIREBASE_DATABASE_URL must be an HTTPS Realtime Database URL."; exit 1 ;; esac
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
+          node -e "JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP + '/firebase-service-account.json', 'utf8'))"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+
+      - name: Install Firebase dependencies and CLI
+        run: |
+          npm install --prefix functions
+          npm install --global firebase-tools
+
+      - name: Configure private database URL for Functions
+        run: |
+          printf 'FIREBASE_DATABASE_URL=%s\n' "$FIREBASE_DATABASE_URL" > "functions/.env.$PROJECT_ID"
+
+      - name: Deploy Realtime Database rules and Cloud Functions
+        run: firebase deploy --only database,functions --project "$PROJECT_ID" --non-interactive
+
+      - name: Grant owner custom claim
+        env:
+          OWNER_EMAIL: ${{ inputs.owner_email }}
+        run: node scripts/set-owner-claim.js
+
+      - name: Remove temporary service-account file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/firebase-service-account.json"
