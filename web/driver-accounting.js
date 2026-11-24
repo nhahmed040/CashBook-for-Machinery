@@ -25,6 +25,28 @@
     });
     return Math.max(0,Math.round(n*100)/100);
   }
+  function statement(payments,ledger,driverId){
+    var rows=[],labels={
+      advance:'Cash advance',
+      'expense-held':'Machine expense paid from driver-held cash',
+      'personal-expense':'Driver-paid expense (reimbursement due)',
+      'company-expense':'Company-paid machine expense',
+      handover:'Cash handover to owner',
+      'advance-return':'Unused cash advance returned',
+      reimbursement:'Reimbursement paid',
+      'expense-request':'Expense awaiting owner review'
+    };
+    (payments||[]).forEach(function(p){
+      if(p.collectorDriverId!==driverId)return;
+      rows.push({id:'payment:'+String(p.id||p.remoteId||''),date:p.date||'',type:'Customer collection',amount:Number(p.amount)||0,note:[p.customerName||'Unassigned collection',p.method||'Cash',p.reference||'',p.note||''].filter(Boolean).join(' · '),status:p.reviewStatus||'Accepted',machineId:p.machineId||'',createdAt:p.created||p.createdAt||''});
+    });
+    (ledger||[]).forEach(function(x){
+      if(x.driverId!==driverId)return;
+      rows.push({id:'ledger:'+String(x.id||''),date:x.date||'',type:labels[x.type]||String(x.type||'Driver transaction'),amount:Number(x.amount)||0,note:[x.category||'',x.supplier||'',x.reference||'',x.note||''].filter(Boolean).join(' · '),status:x.status||'Approved',machineId:x.machineId||'',createdAt:x.created||x.createdAt||''});
+    });
+    rows.sort(function(a,b){var byDate=String(b.date).localeCompare(String(a.date));return byDate||String(b.createdAt).localeCompare(String(a.createdAt));});
+    return rows;
+  }
   function reassignmentCheck(args){
     var held=heldBalance(args.payments,args.ledger,args.driverId,args.machineId);
     var owed=payable(args.ledger,args.driverId);
@@ -32,5 +54,5 @@
     var pendingClosings=(args.closings||[]).filter(function(x){return x.driverId===args.driverId&&x.machineId===args.machineId&&x.status==='pending';}).length;
     return {held:held,owed:owed,pendingExpenses:pendingExpenses,pendingClosings:pendingClosings,clear:Math.abs(held)<=0.005&&owed<=0.005&&!pendingExpenses&&!pendingClosings};
   }
-  return {heldBalance:heldBalance,payable:payable,reassignmentCheck:reassignmentCheck};
+  return {heldBalance:heldBalance,payable:payable,statement:statement,reassignmentCheck:reassignmentCheck};
 });
