@@ -62,3 +62,39 @@ test('driver statement publishes only that driver’s collections and ledger his
   assert.equal(rows[2].type,'Cash advance');
   assert.equal(rows.length,3);
 });
+
+test('driver report metrics separate approved work, custody movements and owner reimbursements',()=>{
+  const args={
+    driverId:'d1',from:'2026-11-01',to:'2026-11-30',machineId:'m1',
+    trips:[
+      {driverId:'d1',machineId:'m1',date:'2026-11-02',amount:1000,approvalStatus:'approved'},
+      {driverId:'d1',machineId:'m1',date:'2026-11-03',amount:500,approvalStatus:'pending'},
+      {driverId:'d1',machineId:'m2',date:'2026-11-03',amount:700,approvalStatus:'approved'}
+    ],
+    payments:[
+      {collectorDriverId:'d1',machineId:'m1',date:'2026-11-04',amount:300},
+      {collectorDriverId:'d2',machineId:'m1',date:'2026-11-04',amount:900}
+    ],
+    expenses:[{driverId:'d1',machineId:'m1',date:'2026-11-05',amount:80}],
+    ledger:[
+      {id:'a',driverId:'d1',machineId:'m1',date:'2026-11-01',type:'advance',amount:200,status:'approved'},
+      {id:'h',driverId:'d1',machineId:'m1',date:'2026-11-06',type:'handover',amount:100,status:'approved'},
+      {id:'e',driverId:'d1',machineId:'m1',date:'2026-11-07',type:'expense-held',amount:20,status:'approved'},
+      {id:'p',driverId:'d1',machineId:'m1',date:'2026-11-08',type:'personal-expense',amount:60,status:'approved'},
+      {id:'r',driverId:'d1',machineId:'m1',date:'2026-11-09',type:'reimbursement',amount:10,status:'approved'}
+    ],
+    attendance:[{driverId:'d1',machineId:'m1',date:'2026-11-02'}],
+    issues:[{driverId:'d1',machineId:'m1',date:'2026-11-03'}]
+  };
+  const m=A.reportMetrics(args);
+  assert.equal(m.trips,1);
+  assert.equal(m.earned,1000);
+  assert.equal(m.collections,300);
+  assert.equal(m.advances,200);
+  assert.equal(m.handovers,100);
+  assert.equal(m.heldExpenses,20);
+  assert.equal(m.heldBalance,380);
+  assert.equal(m.reimbursementDue,50);
+  assert.equal(m.attendance,1);
+  assert.equal(m.issues,1);
+});
