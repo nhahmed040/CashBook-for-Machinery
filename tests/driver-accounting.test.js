@@ -45,3 +45,20 @@ test('driver reassignment is blocked by cash, reimbursement, disputed expense or
   assert.equal(A.reassignmentCheck({...base,ledger:[{driverId:'d1',machineId:'m1',type:'expense-request',status:'disputed'}]}).clear,false);
   assert.equal(A.reassignmentCheck({...base,closings:[{driverId:'d1',machineId:'m1',status:'pending'}]}).clear,false);
 });
+
+test('driver statement publishes only that driver’s collections and ledger history',()=>{
+  const payments=[
+    {id:'p1',collectorDriverId:'d1',machineId:'m1',customerName:'Customer A',amount:300,date:'2026-11-02',method:'Cash'},
+    {id:'p2',collectorDriverId:'d2',machineId:'m2',amount:900,date:'2026-11-03'}
+  ];
+  const ledger=[
+    {id:'l1',driverId:'d1',machineId:'m1',type:'advance',amount:500,date:'2026-11-01',status:'approved',note:'Fuel advance'},
+    {id:'l2',driverId:'d1',machineId:'m1',type:'expense-request',amount:75,date:'2026-11-04',status:'pending',category:'Repair'}
+  ];
+  const rows=A.statement(payments,ledger,'d1');
+  assert.deepEqual(rows.map(x=>x.id),['ledger:l2','payment:p1','ledger:l1']);
+  assert.equal(rows[0].status,'pending');
+  assert.equal(rows[1].type,'Customer collection');
+  assert.equal(rows[2].type,'Cash advance');
+  assert.equal(rows.length,3);
+});
