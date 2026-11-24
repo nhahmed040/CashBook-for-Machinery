@@ -16,10 +16,10 @@
     });
     return Math.round(n*100)/100;
   }
-  function payable(ledger,driverId,upto){
+  function payable(ledger,driverId,upto,machineId){
     var n=0;
     (ledger||[]).forEach(function(x){
-      if(x.driverId!==driverId||(upto&&x.date>upto)||x.status==='pending'||x.status==='disputed'||x.status==='rejected')return;
+      if(x.driverId!==driverId||(machineId&&x.machineId!==machineId)||(upto&&x.date>upto)||x.status==='pending'||x.status==='disputed'||x.status==='rejected')return;
       if(x.type==='personal-expense')n+=Number(x.amount)||0;
       else if(x.type==='reimbursement')n-=Number(x.amount)||0;
     });
@@ -47,6 +47,28 @@
     rows.sort(function(a,b){var byDate=String(b.date).localeCompare(String(a.date));return byDate||String(b.createdAt).localeCompare(String(a.createdAt));});
     return rows;
   }
+  function reportMetrics(args){
+    args=args||{};
+    var driverId=args.driverId,from=args.from||'',to=args.to||'',machineId=args.machineId||'';
+    function inScope(x){return (!machineId||x.machineId===machineId)&&(!from||String(x.date||'')>=from)&&(!to||String(x.date||'')<=to);}
+    function sum(rows){return rows.reduce(function(n,x){return n+(Number(x.amount)||0);},0);}
+    var trips=(args.trips||[]).filter(function(x){return x.driverId===driverId&&inScope(x)&&x.approvalStatus!=='pending'&&x.approvalStatus!=='rejected';});
+    var payments=(args.payments||[]).filter(function(x){return x.collectorDriverId===driverId&&inScope(x);});
+    var expenses=(args.expenses||[]).filter(function(x){return x.driverId===driverId&&inScope(x);});
+    var ledger=(args.ledger||[]).filter(function(x){return x.driverId===driverId&&inScope(x);});
+    var attendance=(args.attendance||[]).filter(function(x){return x.driverId===driverId&&inScope(x);});
+    var issues=(args.issues||[]).filter(function(x){return x.driverId===driverId&&inScope(x);});
+    function ledgerTotal(type){return sum(ledger.filter(function(x){return x.type===type&&x.status!=='pending'&&x.status!=='disputed'&&x.status!=='rejected';}));}
+    return {
+      trips:trips.length,earned:sum(trips),collections:sum(payments),linkedExpenses:sum(expenses),
+      advances:ledgerTotal('advance'),handovers:ledgerTotal('handover'),advanceReturns:ledgerTotal('advance-return'),
+      heldExpenses:ledgerTotal('expense-held'),personalExpenses:ledgerTotal('personal-expense'),
+      pendingExpenseRequests:sum(ledger.filter(function(x){return x.type==='expense-request'&&(x.status==='pending'||x.status==='disputed');})),
+      heldBalance:heldBalance(args.payments,args.ledger,driverId,machineId,to),
+      reimbursementDue:payable(args.ledger,driverId,to,machineId),
+      attendance:attendance.length,issues:issues.length
+    };
+  }
   function reassignmentCheck(args){
     var held=heldBalance(args.payments,args.ledger,args.driverId,args.machineId);
     var owed=payable(args.ledger,args.driverId);
@@ -54,5 +76,5 @@
     var pendingClosings=(args.closings||[]).filter(function(x){return x.driverId===args.driverId&&x.machineId===args.machineId&&x.status==='pending';}).length;
     return {held:held,owed:owed,pendingExpenses:pendingExpenses,pendingClosings:pendingClosings,clear:Math.abs(held)<=0.005&&owed<=0.005&&!pendingExpenses&&!pendingClosings};
   }
-  return {heldBalance:heldBalance,payable:payable,statement:statement,reassignmentCheck:reassignmentCheck};
+  return {heldBalance:heldBalance,payable:payable,statement:statement,reportMetrics:reportMetrics,reassignmentCheck:reassignmentCheck};
 });
