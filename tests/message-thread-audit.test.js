@@ -5,6 +5,8 @@ const fs = require('node:fs');
 
 const owner = fs.readFileSync(require.resolve('../web/machinery.js'), 'utf8');
 const portal = fs.readFileSync(require.resolve('../web/driver-portal.js'), 'utf8');
+const sync = fs.readFileSync(require.resolve('../web/sync.js'), 'utf8');
+const rules = fs.readFileSync(require.resolve('../firebase-rules.json'), 'utf8');
 
 test('owner sync preserves every distinct driver reply instead of overwriting the previous reply', () => {
   assert.match(owner, /msg\.replies=Array\.isArray\(msg\.replies\)\?msg\.replies:\[\]/);
