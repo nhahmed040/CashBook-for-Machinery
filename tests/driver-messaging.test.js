@@ -39,3 +39,15 @@ test('owner sync records driver-to-driver messages in the audit trail',()=>{
   assert.match(owner,/logAudit\('Received','Driver-to-driver message',importedMessage,null\)/);
   assert.match(owner,/senderName:r\.senderName\|\|''/);
 });
+
+test('incoming driver messages can be marked read and owner sync audits the receipt',()=>{
+  assert.match(portal,/msg\.senderRole==='owner'\|\|\(msg\.senderRole==='driver'&&msg\.direction==='incoming'\)/);
+  assert.match(owner,/x\.senderRole==='driver'&&x\.recipientDriverId===d\.id/);
+  assert.match(owner,/logAudit\('Read','Driver message',msg,null\)/);
+});
+test('Firebase rules only permit read receipts for owner messages or incoming peer messages',()=>{
+  const rules=fs.readFileSync(require.resolve('../firebase-rules.json'),'utf8');
+  assert.match(rules,/senderRole.*owner/);
+  assert.match(rules,/recipientDriverId.*\$driverId/);
+  assert.match(rules,/direction.*incoming/);
+});
