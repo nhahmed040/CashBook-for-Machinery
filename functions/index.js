@@ -5,7 +5,7 @@ const { getAuth } = require('firebase-admin/auth');
 const { getDatabase } = require('firebase-admin/database');
 initializeApp();
 
-const PERMISSION_KEYS = ['viewDashboard','recordTrips','viewBalance','viewHistory','confirmNotifications','reportDisputes','recordAttendance','reportIssues','replyMessages','recordCollections'];
+const PERMISSION_KEYS = ['viewDashboard','recordTrips','viewBalance','viewHistory','confirmNotifications','reportDisputes','recordAttendance','reportIssues','replyMessages','recordCollections','manageDocuments'];
 function requireOwner(request) {
   if (!request.auth || request.auth.token.owner !== true) throw new HttpsError('permission-denied','Only the business owner can manage driver accounts.');
 }
