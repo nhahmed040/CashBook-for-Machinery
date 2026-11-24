@@ -27,3 +27,14 @@ test('driver portal displays previously submitted replies under the matching own
 test('message reply audit snapshots retain the reply identity, text and timestamp', () => {
   assert.match(owner, /'messageId','reply','driverName','createdAt'/);
 });
+
+test('first message read receipt is audited once and owner history shows delivery and read state', () => {
+  assert.match(owner, /if\(msg&&!msg\.readAt\)\{msg\.readAt=r\.readAt\|\|r\.createdAt\|\|new Date\(\)\.toISOString\(\);logAudit\('Read','Driver message',msg,null\);\}/);
+  assert.match(owner, /'subject','direction','readAt','notificationSentStatus'/);
+  assert.match(owner, /Delivery: '\+\(x\.remoteId\|\|x\.notificationSentStatus\?'Delivered':'Pending'\)\+' · Read:/);
+});
+
+test('driver read receipts are limited to an existing owner-authored message', () => {
+  assert.match(sync, /newData\.child\('messageId'\)\.exists\(\).*messages\/.*senderRole/);
+  assert.match(rules, /newData\.child\('messageId'\)\.exists\(\).*messages\/.*senderRole/);
+});
