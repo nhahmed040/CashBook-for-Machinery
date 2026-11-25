@@ -3345,6 +3345,22 @@
               if (!window.confirm(t('cf_revoke', { name: b.name }))) return;
               cloud.revokeInvites(sy.id).then(function () { invite = ''; toast(t('invites_revoked')); renderCloud(); }, fail);
             }));
+            P.appendChild(btn('Stop sharing with everyone', 'block danger', function () {
+              if (!window.confirm('Stop sharing "' + b.name + '" with everyone? All members will lose access and all invitation codes will be revoked. Your book and its entries will be kept.')) return;
+              cloud.getBook(sy.id).then(function (fresh) {
+                var uids = Object.keys((fresh && fresh.members) || {});
+                return cloud.revokeInvites(sy.id).then(function () {
+                  return uids.reduce(function (chain, uid) {
+                    return chain.then(function () { return cloud.removeMember(sy.id, uid); });
+                  }, Promise.resolve());
+                }).then(function () {
+                  invite = '';
+                  info[sy.id] = { meta: fresh.meta, members: {} };
+                  toast('Sharing stopped. Your book and entries are preserved.');
+                  renderCloud(); renderBooks();
+                });
+              }).catch(fail);
+            }));
             if (inf) {
               var uids = Object.keys(inf.members);
               if (uids.length) P.appendChild(el('h2', null, t('members')));
