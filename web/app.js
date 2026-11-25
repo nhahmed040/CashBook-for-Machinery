@@ -3346,19 +3346,20 @@
               cloud.revokeInvites(sy.id).then(function () { invite = ''; toast(t('invites_revoked')); renderCloud(); }, fail);
             }));
             P.appendChild(btn('Stop sharing with everyone', 'block danger', function () {
-              if (!window.confirm('Stop sharing "' + b.name + '" with everyone? All members will lose access and all invitation codes will be revoked. Your book and its entries will be kept.')) return;
-              cloud.getBook(sy.id).then(function (fresh) {
-                var uids = Object.keys((fresh && fresh.members) || {});
-                return cloud.revokeInvites(sy.id).then(function () {
-                  return uids.reduce(function (chain, uid) {
-                    return chain.then(function () { return cloud.removeMember(sy.id, uid); });
-                  }, Promise.resolve());
-                }).then(function () {
-                  invite = '';
-                  info[sy.id] = { meta: fresh.meta, members: {} };
-                  toast('Sharing stopped. Your book and entries are preserved.');
-                  renderCloud(); renderBooks();
-                });
+              if (!window.confirm('Stop sharing "' + b.name + '" with everyone? The online shared copy and all invitation codes will be deleted, so nobody can access it anymore. Your local book and its entries will be kept.')) return;
+              cloud.deleteBook(sy.id).then(function () {
+                // The shared cloud record is now gone. Remove this owner's index too;
+                // even if index cleanup fails, detach the local book so it cannot recreate sharing.
+                return cloud.indexDelete(sy.id).then(function () { return null; }, function (e) { return e; });
+              }).then(function (indexError) {
+                delete b.sync;
+                b.nolink = true;
+                invite = '';
+                save();
+                renderAll();
+                toast(indexError
+                  ? 'Sharing stopped and your local book is preserved. A stale cloud shortcut may remain in your account.'
+                  : 'Sharing stopped. The shared cloud copy was deleted; your local book and entries are preserved.');
               }).catch(fail);
             }));
             if (inf) {
