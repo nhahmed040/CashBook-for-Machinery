@@ -3356,7 +3356,7 @@
                 }).then(function () {
                   invite = '';
                   info[sy.id] = { meta: fresh.meta, members: {} };
-                  toast('Sharing stopped. Your book and entries are محفوظ.');
+                  toast('Sharing stopped. Your book and entries are preserved.');
                   renderCloud(); renderBooks();
                 });
               }).catch(fail);
